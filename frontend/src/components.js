@@ -630,7 +630,7 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
             onClick={handleSendMessage}
             className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-3 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            <FaSend />
+            <FaPaperPlane />
           </button>
         </div>
       </div>
