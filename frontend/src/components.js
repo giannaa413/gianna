@@ -1715,7 +1715,7 @@ const PaywallScreen = ({ subscription, onUpgrade, onBack }) => {
       tier: 'premium'
     },
     {
-      icon: FaDiamond,
+      icon: FaGem,
       title: 'Unlimited Swipes',
       description: 'Never run out of potential matches',
       tier: 'platinum'
