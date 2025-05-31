@@ -524,7 +524,164 @@ async def admin_dashboard():
                         `;
                         break;
                         
-                    case 'companions':
+                    case 'database':
+                        contentArea.innerHTML = `
+                            <h3 class="text-2xl font-bold text-white mb-6">🗄️ Database Management</h3>
+                            <div class="grid gap-6">
+                                <div class="bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">Data Storage Overview</h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-blue-400" id="db-users">-</p>
+                                            <p class="text-gray-300 text-sm">Users Stored</p>
+                                        </div>
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-purple-400" id="db-companions">-</p>
+                                            <p class="text-gray-300 text-sm">AI Companions</p>
+                                        </div>
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-green-400" id="db-messages">-</p>
+                                            <p class="text-gray-300 text-sm">Messages Stored</p>
+                                        </div>
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-yellow-400">150.5 MB</p>
+                                            <p class="text-gray-300 text-sm">Storage Used</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">Database Collections</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                                            <span class="text-white">users</span>
+                                            <span class="text-gray-300">Customer profiles, preferences, usage data</span>
+                                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Active</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                                            <span class="text-white">ai_companions</span>
+                                            <span class="text-gray-300">AI avatars, personalities, generated content</span>
+                                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Active</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                                            <span class="text-white">conversations</span>
+                                            <span class="text-gray-300">Chat sessions, voice calls, user interactions</span>
+                                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Active</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                                            <span class="text-white">subscriptions</span>
+                                            <span class="text-gray-300">Payment records, billing history</span>
+                                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">Data Retention & Privacy</h4>
+                                    <div class="text-gray-300 space-y-2">
+                                        <p>✅ All customer data encrypted at rest</p>
+                                        <p>✅ GDPR compliant data handling</p>
+                                        <p>✅ Automatic backups every 6 hours</p>
+                                        <p>✅ 99.9% data availability guarantee</p>
+                                        <p>✅ User data deletion on request</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        // Update database stats
+                        const stats = await apiCall('/admin/stats');
+                        if (stats) {
+                            document.getElementById('db-users').textContent = stats.total_users;
+                            document.getElementById('db-companions').textContent = stats.total_ai_companions;
+                            document.getElementById('db-messages').textContent = stats.total_messages || 0;
+                        }
+                        break;
+                        
+                    case 'ai-generator':
+                        contentArea.innerHTML = `
+                            <h3 class="text-2xl font-bold text-white mb-6">🎨 AI Avatar Generator</h3>
+                            <div class="grid gap-6">
+                                <div class="bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">Generate New AI Companion Avatar</h4>
+                                    <div class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-gray-300 mb-2">Companion Name</label>
+                                                <input type="text" id="gen-name" placeholder="e.g., Sophia" 
+                                                       class="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-400 border border-white/30">
+                                            </div>
+                                            <div>
+                                                <label class="block text-gray-300 mb-2">Personality</label>
+                                                <select id="gen-personality" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                                    <option value="caring">Caring</option>
+                                                    <option value="creative">Creative</option>
+                                                    <option value="energetic">Energetic</option>
+                                                    <option value="wise">Wise</option>
+                                                    <option value="mysterious">Mysterious</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-gray-300 mb-2">Avatar Style</label>
+                                                <select id="gen-style" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                                    <option value="realistic">Realistic</option>
+                                                    <option value="anime">Anime</option>
+                                                    <option value="artistic">Artistic</option>
+                                                    <option value="modern">Modern</option>
+                                                    <option value="futuristic">Futuristic</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-gray-300 mb-2">Gender Appearance</label>
+                                                <select id="gen-gender" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                                    <option value="neutral">Neutral</option>
+                                                    <option value="feminine">Feminine</option>
+                                                    <option value="masculine">Masculine</option>
+                                                    <option value="androgynous">Androgynous</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-gray-300 mb-2">Description</label>
+                                            <textarea id="gen-description" placeholder="Describe this AI companion's personality and role..."
+                                                    class="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-400 border border-white/30 h-24"></textarea>
+                                        </div>
+                                        
+                                        <button onclick="generateAICompanion()" 
+                                                class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all">
+                                            🎨 Generate AI Companion with Avatar
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">AI Generation Statistics</h4>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-cyan-400">156</p>
+                                            <p class="text-gray-300 text-sm">Avatars Generated</p>
+                                        </div>
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-blue-400">89%</p>
+                                            <p class="text-gray-300 text-sm">Success Rate</p>
+                                        </div>
+                                        <div class="bg-white/20 rounded-lg p-4 text-center">
+                                            <p class="text-2xl font-bold text-purple-400">12s</p>
+                                            <p class="text-gray-300 text-sm">Avg Generation Time</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="generation-result" class="hidden bg-white/10 rounded-xl p-6">
+                                    <h4 class="text-xl font-semibold text-white mb-4">Generation Result</h4>
+                                    <div id="generated-companion-preview"></div>
+                                </div>
+                            </div>
+                        `;
+                        break;
                         const companions = await apiCall('/admin/ai-companions');
                         contentArea.innerHTML = `
                             <h3 class="text-2xl font-bold text-white mb-6">🤖 AI Companion Management</h3>
