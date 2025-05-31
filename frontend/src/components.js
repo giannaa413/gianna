@@ -1827,7 +1827,7 @@ const PaywallScreen = ({ subscription, onUpgrade, onBack }) => {
               className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-3xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               <div className="flex items-center justify-center space-x-3">
-                <FaDiamond className="text-2xl" />
+                <FaGem className="text-2xl" />
                 <div>
                   <h3 className="text-xl font-semibold">Platinum - $19.99/month</h3>
                   <p className="text-sm opacity-90">Everything + unlimited swipes</p>
