@@ -6,7 +6,7 @@ import {
   FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave,
   FaCog, FaTrash, FaCheck, FaRandom, FaPalette, FaUserPlus, FaCrown,
   FaMicrophone, FaMicrophoneSlash, FaPlay, FaPause, FaCreditCard,
-  FaDiamond, FaInfinity, FaLock, FaUnlock, FaVolumeUp, FaHeadphones
+  FaGem, FaInfinity, FaLock, FaUnlock, FaVolumeUp, FaHeadphones
 } from 'react-icons/fa';
 import RealtimeAudioChat from './realtimeChat';
 
