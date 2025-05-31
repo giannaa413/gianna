@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { FaHeart, FaTimes, FaStar, FaArrowLeft, FaSend, FaCamera, FaEdit } from 'react-icons/fa';
+import { FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit } from 'react-icons/fa';
 
 // Mock profile data
 const profiles = [
