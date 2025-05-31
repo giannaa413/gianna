@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { 
   FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit,
