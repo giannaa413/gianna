@@ -1,52 +1,64 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import './App.css';
+import Components from './components';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+const { 
+  WelcomeScreen, 
+  ProfileDiscovery, 
+  MatchScreen, 
+  ChatInterface, 
+  ProfileSetup 
+} = Components;
 
 function App() {
+  const [currentScreen, setCurrentScreen] = useState('welcome');
+  const [user, setUser] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [currentMatch, setCurrentMatch] = useState(null);
+
+  const screens = {
+    welcome: <WelcomeScreen onGetStarted={() => setCurrentScreen('setup')} />,
+    setup: <ProfileSetup onComplete={(userData) => {
+      setUser(userData);
+      setCurrentScreen('discovery');
+    }} />,
+    discovery: <ProfileDiscovery 
+      user={user}
+      onMatch={(matchData) => {
+        setMatches(prev => [...prev, matchData]);
+        setCurrentMatch(matchData);
+        setCurrentScreen('match');
+      }}
+      onOpenChat={() => setCurrentScreen('chat')}
+    />,
+    match: <MatchScreen 
+      match={currentMatch}
+      onStartChat={() => setCurrentScreen('chat')}
+      onKeepSwiping={() => setCurrentScreen('discovery')}
+    />,
+    chat: <ChatInterface 
+      matches={matches}
+      currentMatch={currentMatch}
+      onBack={() => setCurrentScreen('discovery')}
+      onSelectMatch={(match) => setCurrentMatch(match)}
+    />
+  };
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <div className="App min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentScreen}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.3 }}
+          className="min-h-screen"
+        >
+          {screens[currentScreen]}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
