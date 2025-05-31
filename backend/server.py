@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                                ${companions ? companions.map(companion => `
-                                    <div class="bg-white/10 rounded-xl p-4 flex items-center space-x-4">
-                                        <img src="${companion.avatar}" alt="${companion.name}" class="w-16 h-16 rounded-full object-cover">
-                                        <div class="flex-1">
                                             <div class="flex items-center space-x-2">
                                                 <h4 class="text-xl font-semibold text-white">${companion.name}</h4>
                                                 <span class="text-2xl">${companion.emoji}</span>
