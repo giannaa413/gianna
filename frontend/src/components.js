@@ -3,7 +3,8 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { 
   FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit,
   FaUser, FaComments, FaBookOpen, FaSmile, FaBrain, FaRocket, FaMoon,
-  FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave
+  FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave,
+  FaCog, FaTrash, FaCheck, FaRandom, FaPalette, FaUserPlus
 } from 'react-icons/fa';
 
 // Mock profile data
@@ -58,6 +59,47 @@ const profiles = [
   }
 ];
 
+// AI Avatar options
+const avatarOptions = [
+  'https://images.unsplash.com/photo-1485827404703-89b55fcc595e',
+  'https://images.pexels.com/photos/8566540/pexels-photo-8566540.jpeg',
+  'https://images.unsplash.com/photo-1643255083197-18721220670e',
+  'https://images.unsplash.com/photo-1742197143486-d6c7d146fbc3',
+  'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
+  'https://images.unsplash.com/photo-1625314868143-20e93ce3ff33',
+  'https://images.pexels.com/photos/8721322/pexels-photo-8721322.jpeg',
+  'https://images.unsplash.com/photo-1620712943543-bcc4688e7485'
+];
+
+// Personality templates
+const personalityTemplates = [
+  {
+    name: 'Caring Companion',
+    traits: ['Empathetic', 'Supportive', 'Understanding', 'Patient'],
+    description: 'A warm and caring companion who provides emotional support'
+  },
+  {
+    name: 'Creative Muse',
+    traits: ['Creative', 'Inspiring', 'Artistic', 'Imaginative'],
+    description: 'An artistic soul who sparks creativity and imagination'
+  },
+  {
+    name: 'Adventure Buddy',
+    traits: ['Energetic', 'Adventurous', 'Optimistic', 'Bold'],
+    description: 'An energetic companion who loves new experiences'
+  },
+  {
+    name: 'Wise Mentor',
+    traits: ['Wise', 'Thoughtful', 'Philosophical', 'Insightful'],
+    description: 'A thoughtful mentor who provides deep insights'
+  },
+  {
+    name: 'Playful Friend',
+    traits: ['Playful', 'Humorous', 'Lighthearted', 'Fun'],
+    description: 'A fun-loving friend who brings joy and laughter'
+  }
+];
+
 // Welcome Screen Component
 const WelcomeScreen = ({ onGetStarted }) => {
   return (
@@ -93,7 +135,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
             transition={{ delay: 0.6 }}
             className="text-xl text-gray-300 mb-2"
           >
-            Your AI companion & connection finder
+            Your personalized AI companion & connection finder
           </motion.p>
           
           <motion.p
@@ -102,7 +144,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
             transition={{ delay: 0.8 }}
             className="text-gray-400"
           >
-            Find love, make connections, and have an AI friend who's always there for you.
+            Create your perfect AI companion, find love, and build meaningful connections.
           </motion.p>
         </div>
 
@@ -120,7 +162,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
           </button>
           
           <p className="text-sm text-gray-500">
-            Available on iOS, Android & Web
+            Choose from AI companions or create your own
           </p>
         </motion.div>
       </motion.div>
@@ -128,12 +170,449 @@ const WelcomeScreen = ({ onGetStarted }) => {
   );
 };
 
-// Main Dashboard Component
-const MainDashboard = ({ user, aiCompanion, onNavigate, matches }) => {
-  const [activeTab, setActiveTab] = useState('home');
+// AI Companion Selector Component
+const AICompanionSelector = ({ companions, onSelectCompanion, onCreateNew }) => {
+  return (
+    <div className="min-h-screen p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-2xl mx-auto"
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-4">Choose Your AI Companion</h1>
+          <p className="text-gray-300">Select from our curated companions or create your own unique AI friend</p>
+        </div>
 
+        {/* Create New Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          onClick={onCreateNew}
+          className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white p-6 rounded-3xl mb-6 hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+        >
+          <div className="flex items-center justify-center space-x-4">
+            <FaUserPlus className="text-2xl" />
+            <div>
+              <h3 className="text-xl font-semibold">Create Your Own Companion</h3>
+              <p className="text-sm opacity-90">Design a personalized AI friend just for you</p>
+            </div>
+          </div>
+        </motion.button>
+
+        {/* Companion Grid */}
+        <div className="grid gap-4">
+          {companions.map((companion, index) => (
+            <motion.button
+              key={companion.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.1 }}
+              onClick={() => onSelectCompanion(companion)}
+              className="bg-white/10 backdrop-blur-md rounded-3xl p-6 hover:bg-white/20 transition-all duration-200 text-left"
+            >
+              <div className="flex items-center space-x-4">
+                <img
+                  src={companion.avatar}
+                  alt={companion.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="text-xl font-semibold text-white">{companion.name}</h3>
+                    <span className="text-2xl">{companion.emoji}</span>
+                  </div>
+                  <p className="text-gray-300 text-sm mb-2">{companion.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {companion.traits.map((trait) => (
+                      <span
+                        key={trait}
+                        className="bg-white/20 text-white px-2 py-1 rounded-full text-xs"
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {companion.isActive && (
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <FaCheck className="text-white text-sm" />
+                  </div>
+                )}
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// AI Companion Creator Component
+const AICompanionCreator = ({ onComplete, onBack }) => {
+  const [step, setStep] = useState(1);
+  const [newCompanion, setNewCompanion] = useState({
+    name: '',
+    avatar: avatarOptions[0],
+    personality: '',
+    traits: [],
+    description: '',
+    emoji: '🤖'
+  });
+
+  const emojis = ['🤖', '👨', '👩', '🧙‍♂️', '🧙‍♀️', '👽', '🌟', '💎', '🔮', '⚡', '🌙', '☀️'];
+
+  const handleTraitToggle = (trait) => {
+    setNewCompanion(prev => ({
+      ...prev,
+      traits: prev.traits.includes(trait)
+        ? prev.traits.filter(t => t !== trait)
+        : [...prev.traits, trait]
+    }));
+  };
+
+  const availableTraits = [
+    'Empathetic', 'Creative', 'Energetic', 'Wise', 'Playful', 'Supportive',
+    'Adventurous', 'Artistic', 'Thoughtful', 'Humorous', 'Patient', 'Optimistic',
+    'Inspiring', 'Understanding', 'Bold', 'Imaginative', 'Insightful', 'Fun'
+  ];
+
+  const handleComplete = () => {
+    if (newCompanion.name && newCompanion.traits.length >= 3) {
+      onComplete(newCompanion);
+    }
+  };
+
+  return (
+    <div className="min-h-screen p-6">
+      <div className="max-w-md mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl"
+        >
+          {/* Header */}
+          <div className="flex items-center mb-6">
+            <button onClick={onBack} className="text-white mr-4">
+              <FaArrowLeft className="text-xl" />
+            </button>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white">Create AI Companion</h2>
+              <span className="text-gray-400">Step {step}/4</span>
+            </div>
+          </div>
+
+          <div className="w-full bg-gray-700 rounded-full h-2 mb-6">
+            <div 
+              className="bg-gradient-to-r from-green-500 to-teal-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(step/4) * 100}%` }}
+            ></div>
+          </div>
+
+          {/* Step 1: Basic Info */}
+          {step === 1 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-gray-300 mb-2">Companion Name</label>
+                <input
+                  type="text"
+                  value={newCompanion.name}
+                  onChange={(e) => setNewCompanion(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full bg-white/20 text-white placeholder-gray-400 p-3 rounded-xl border border-white/30 focus:outline-none focus:border-green-500"
+                  placeholder="Enter a name for your AI companion"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-2">Choose an Emoji</label>
+                <div className="grid grid-cols-6 gap-2">
+                  {emojis.map((emoji) => (
+                    <button
+                      key={emoji}
+                      onClick={() => setNewCompanion(prev => ({ ...prev, emoji }))}
+                      className={`p-3 rounded-xl text-2xl transition-all ${
+                        newCompanion.emoji === emoji
+                          ? 'bg-green-500 scale-110'
+                          : 'bg-white/20 hover:bg-white/30'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setStep(2)}
+                disabled={!newCompanion.name}
+                className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl font-semibold disabled:opacity-50"
+              >
+                Continue
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 2: Avatar Selection */}
+          {step === 2 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-gray-300 mb-4">Choose an Avatar</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {avatarOptions.map((avatar, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setNewCompanion(prev => ({ ...prev, avatar }))}
+                      className={`relative overflow-hidden rounded-xl transition-all ${
+                        newCompanion.avatar === avatar
+                          ? 'ring-4 ring-green-500 scale-105'
+                          : 'hover:scale-105'
+                      }`}
+                    >
+                      <img
+                        src={avatar}
+                        alt={`Avatar ${index + 1}`}
+                        className="w-full h-24 object-cover"
+                      />
+                      {newCompanion.avatar === avatar && (
+                        <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                          <FaCheck className="text-white text-xl" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl font-semibold"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 3: Personality Traits */}
+          {step === 3 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-gray-300 mb-4">Select Personality Traits (Choose at least 3)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {availableTraits.map((trait) => (
+                    <button
+                      key={trait}
+                      onClick={() => handleTraitToggle(trait)}
+                      className={`p-3 rounded-xl border transition-all duration-200 text-sm ${
+                        newCompanion.traits.includes(trait)
+                          ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white border-transparent'
+                          : 'bg-white/20 text-gray-300 border-white/30 hover:border-green-500'
+                      }`}
+                    >
+                      {trait}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-sm mt-2">
+                  Selected: {newCompanion.traits.length}/18
+                </p>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStep(2)}
+                  className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep(4)}
+                  disabled={newCompanion.traits.length < 3}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl font-semibold disabled:opacity-50"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 4: Description */}
+          {step === 4 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-gray-300 mb-2">Companion Description</label>
+                <textarea
+                  value={newCompanion.description}
+                  onChange={(e) => setNewCompanion(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full bg-white/20 text-white placeholder-gray-400 p-3 rounded-xl border border-white/30 focus:outline-none focus:border-green-500 h-32 resize-none"
+                  placeholder="Describe your AI companion's personality and what makes them special..."
+                />
+              </div>
+
+              {/* Preview */}
+              <div className="bg-white/20 rounded-xl p-4">
+                <h3 className="text-white font-semibold mb-2">Preview</h3>
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={newCompanion.avatar}
+                    alt="Preview"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white font-medium">{newCompanion.name}</span>
+                      <span className="text-lg">{newCompanion.emoji}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {newCompanion.traits.slice(0, 3).map((trait) => (
+                        <span
+                          key={trait}
+                          className="bg-white/30 text-white px-2 py-1 rounded-full text-xs"
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setStep(3)}
+                  className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleComplete}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl font-semibold"
+                >
+                  Create Companion
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// AI Companion Manager Component
+const AICompanionManager = ({ companions, activeCompanion, onSelectCompanion, onCreateNew, onBack, onDeleteCompanion }) => {
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-white">Manage AI Companions</h2>
+          <p className="text-gray-400">Switch between or create new AI companions</p>
+        </div>
+        <button
+          onClick={onCreateNew}
+          className="bg-gradient-to-r from-green-500 to-teal-500 text-white p-3 rounded-full"
+        >
+          <FaPlus />
+        </button>
+      </div>
+
+      {/* Companions List */}
+      <div className="p-6 space-y-4">
+        {companions.map((companion) => (
+          <motion.div
+            key={companion.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`bg-white/10 backdrop-blur-md rounded-3xl p-6 ${
+              companion.isActive ? 'ring-2 ring-green-500' : ''
+            }`}
+          >
+            <div className="flex items-center space-x-4">
+              <img
+                src={companion.avatar}
+                alt={companion.name}
+                className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+              />
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h3 className="text-xl font-semibold text-white">{companion.name}</h3>
+                  <span className="text-2xl">{companion.emoji}</span>
+                  {companion.isActive && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-300 text-sm mb-2">{companion.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {companion.traits.slice(0, 4).map((trait) => (
+                    <span
+                      key={trait}
+                      className="bg-white/20 text-white px-2 py-1 rounded-full text-xs"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col space-y-2">
+                {!companion.isActive && (
+                  <button
+                    onClick={() => onSelectCompanion(companion)}
+                    className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-medium"
+                  >
+                    Switch To
+                  </button>
+                )}
+                {companions.length > 1 && (
+                  <button
+                    onClick={() => onDeleteCompanion(companion.id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium"
+                  >
+                    <FaTrash />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Main Dashboard Component
+const MainDashboard = ({ user, aiCompanion, onNavigate, matches }) => {
   const quickActions = [
-    { icon: FaComments, label: 'Chat with Luna', action: () => onNavigate('aiChat'), color: 'from-blue-500 to-purple-600' },
+    { icon: FaComments, label: `Chat with ${aiCompanion?.name || 'AI'}`, action: () => onNavigate('aiChat'), color: 'from-blue-500 to-purple-600' },
     { icon: FaHeart, label: 'Find Matches', action: () => onNavigate('discovery'), color: 'from-pink-500 to-red-500' },
     { icon: FaBookOpen, label: 'My Diary', action: () => onNavigate('diary'), color: 'from-green-500 to-teal-500' },
     { icon: FaSmile, label: 'Mood Check', action: () => onNavigate('mood'), color: 'from-yellow-500 to-orange-500' }
@@ -148,38 +627,63 @@ const MainDashboard = ({ user, aiCompanion, onNavigate, matches }) => {
             <h1 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'Friend'}!</h1>
             <p className="text-gray-300">How are you feeling today?</p>
           </div>
-          <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-            <FaUser className="text-white text-xl" />
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => onNavigate('aiManager')}
+              className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center"
+            >
+              <FaCog className="text-white text-xl" />
+            </button>
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+              <FaUser className="text-white text-xl" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* AI Companion Card */}
       <div className="p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
-        >
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-2xl">
-              🌙
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-white">Luna</h3>
-              <p className="text-gray-300">Your AI companion</p>
-            </div>
-          </div>
-          <p className="text-gray-300 mb-4">
-            "Hi {user?.name}! I'm here to listen, support you, and be your friend. How was your day?"
-          </p>
-          <button
-            onClick={() => onNavigate('aiChat')}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+        {aiCompanion && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
           >
-            Start Conversation
-          </button>
-        </motion.div>
+            <div className="flex items-center space-x-4 mb-4">
+              <img
+                src={aiCompanion.avatar}
+                alt={aiCompanion.name}
+                className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+              />
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-xl font-semibold text-white">{aiCompanion.name}</h3>
+                  <span className="text-2xl">{aiCompanion.emoji}</span>
+                </div>
+                <p className="text-gray-300">Your AI companion</p>
+                <div className="flex gap-2 mt-1">
+                  {aiCompanion.traits.slice(0, 3).map((trait) => (
+                    <span
+                      key={trait}
+                      className="bg-white/20 text-white px-2 py-1 rounded-full text-xs"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-300 mb-4">
+              "Hi {user?.name}! I'm here to listen, support you, and be your friend. How was your day?"
+            </p>
+            <button
+              onClick={() => onNavigate('aiChat')}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+            >
+              Start Conversation
+            </button>
+          </motion.div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -228,12 +732,12 @@ const MainDashboard = ({ user, aiCompanion, onNavigate, matches }) => {
   );
 };
 
-// AI Companion Chat Component
+// Enhanced AI Companion Chat Component
 const AICompanionChat = ({ aiCompanion, user, onBack }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: `Hi ${user?.name || 'there'}! I'm Luna, your AI companion. I'm here to listen, support you, and be your friend. How are you feeling today?`,
+      text: `Hi ${user?.name || 'there'}! I'm ${aiCompanion?.name || 'your AI companion'}. ${aiCompanion?.description || "I'm here to listen, support you, and be your friend."} How are you feeling today?`,
       sender: 'ai',
       timestamp: new Date(Date.now() - 1800000),
       mood: 'caring'
@@ -251,7 +755,7 @@ const AICompanionChat = ({ aiCompanion, user, onBack }) => {
 
   const aiResponses = {
     supportive: [
-      "I'm here for you. Tell me more about how you're feeling.",
+      `I'm here for you, ${user?.name}. Tell me more about how you're feeling.`,
       "That sounds challenging. You're doing great by sharing this with me.",
       "I believe in you. You have the strength to get through this.",
       "Thank you for trusting me with your thoughts. How can I help?",
@@ -314,11 +818,16 @@ const AICompanionChat = ({ aiCompanion, user, onBack }) => {
           <button onClick={onBack} className="text-white">
             <FaArrowLeft className="text-xl" />
           </button>
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xl">
-            🌙
-          </div>
+          <img
+            src={aiCompanion?.avatar}
+            alt={aiCompanion?.name}
+            className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
+          />
           <div>
-            <h3 className="text-white font-semibold">Luna</h3>
+            <div className="flex items-center space-x-2">
+              <h3 className="text-white font-semibold">{aiCompanion?.name || 'AI Companion'}</h3>
+              <span className="text-lg">{aiCompanion?.emoji || '🤖'}</span>
+            </div>
             <p className="text-gray-400 text-sm">AI Companion • Always here for you</p>
           </div>
         </div>
@@ -392,7 +901,7 @@ const AICompanionChat = ({ aiCompanion, user, onBack }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Share your thoughts with Luna..."
+            placeholder={`Share your thoughts with ${aiCompanion?.name || 'your AI companion'}...`}
             className="flex-1 bg-white/20 text-white placeholder-gray-400 p-3 rounded-full border border-white/30 focus:outline-none focus:border-blue-500"
           />
           <button
@@ -407,7 +916,7 @@ const AICompanionChat = ({ aiCompanion, user, onBack }) => {
   );
 };
 
-// Diary Interface Component
+// Import other components (unchanged)
 const DiaryInterface = ({ user, onBack }) => {
   const [entries, setEntries] = useState([
     {
@@ -545,7 +1054,7 @@ const DiaryInterface = ({ user, onBack }) => {
   );
 };
 
-// Mood Tracker Component
+// Mood Tracker Component (unchanged from previous)
 const MoodTracker = ({ user, onBack }) => {
   const [currentMood, setCurrentMood] = useState('');
   const [moodHistory, setMoodHistory] = useState([
@@ -619,7 +1128,7 @@ const MoodTracker = ({ user, onBack }) => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
         >
-          <h3 className="text-xl font-semibold text-white mb-3">Luna's Insights</h3>
+          <h3 className="text-xl font-semibold text-white mb-3">AI Insights</h3>
           <p className="text-gray-300">
             "I've noticed you've been feeling quite positive lately! Your mood has been trending upward over the past few days. 
             Keep doing what makes you happy! 💫"
@@ -1171,5 +1680,8 @@ export {
   MainDashboard,
   AICompanionChat,
   DiaryInterface,
-  MoodTracker
+  MoodTracker,
+  AICompanionSelector,
+  AICompanionCreator,
+  AICompanionManager
 };
