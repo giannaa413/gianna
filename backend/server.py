@@ -16,6 +16,19 @@ from datetime import datetime, timedelta
 import hashlib
 import secrets
 
+# Import our enhanced models and AI services
+from models import (
+    User, AICompanion, ChatMessage, Conversation, Match, 
+    Subscription, UserAnalytics, ModerationReport, SystemSettings,
+    APIUsage, UserStatus, SubscriptionTier, AIPersonalityType
+)
+from ai_avatar_generator import avatar_service
+from celebrity_companions import (
+    get_celebrity_companions, get_companion_by_id, 
+    is_system_companion, can_user_delete_companion
+)
+from digital_human_generator import digital_human_service
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
