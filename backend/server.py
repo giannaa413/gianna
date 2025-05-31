@@ -780,6 +780,86 @@ async def admin_dashboard():
                     }
                 }
             }
+
+            async function generateAICompanion() {
+                const name = document.getElementById('gen-name').value;
+                const personality = document.getElementById('gen-personality').value;
+                const style = document.getElementById('gen-style').value;
+                const gender = document.getElementById('gen-gender').value;
+                const description = document.getElementById('gen-description').value;
+                
+                if (!name || !description) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                const companionData = {
+                    name: name,
+                    personality: personality,
+                    description: description,
+                    traits: [personality, 'AI-generated', 'Unique'],
+                    is_premium: true,
+                    voice_enabled: true,
+                    generate_avatar: true,
+                    avatar_style: style,
+                    gender_appearance: gender
+                };
+                
+                try {
+                    // Show loading state
+                    const resultDiv = document.getElementById('generation-result');
+                    resultDiv.classList.remove('hidden');
+                    document.getElementById('generated-companion-preview').innerHTML = `
+                        <div class="text-center text-white">
+                            <div class="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <p>Generating AI companion avatar...</p>
+                            <p class="text-gray-400 text-sm">This may take 10-15 seconds</p>
+                        </div>
+                    `;
+                    
+                    const result = await apiCall('/admin/ai-companions', 'POST', companionData);
+                    
+                    if (result) {
+                        // Show success result
+                        document.getElementById('generated-companion-preview').innerHTML = `
+                            <div class="flex items-center space-x-4 bg-white/20 rounded-xl p-4">
+                                <img src="${result.avatar_url}" alt="${result.name}" 
+                                     class="w-20 h-20 rounded-full object-cover border-2 border-cyan-500">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <h4 class="text-xl font-semibold text-white">${result.name}</h4>
+                                        <span class="text-2xl">${result.emoji}</span>
+                                        <span class="bg-cyan-500 text-white px-2 py-1 rounded-full text-xs">AI Generated</span>
+                                    </div>
+                                    <p class="text-gray-300 mb-2">${result.description}</p>
+                                    <div class="flex gap-2">
+                                        ${result.traits.map(trait => `<span class="bg-white/30 text-white px-2 py-1 rounded-full text-xs">${trait}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-cyan-400 font-semibold">✅ Generated</p>
+                                    <p class="text-gray-400 text-sm">Ready to use</p>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Clear form
+                        document.getElementById('gen-name').value = '';
+                        document.getElementById('gen-description').value = '';
+                        
+                        alert('AI companion generated successfully!');
+                    } else {
+                        throw new Error('Generation failed');
+                    }
+                } catch (error) {
+                    document.getElementById('generated-companion-preview').innerHTML = `
+                        <div class="text-center text-red-400">
+                            <p>❌ Generation failed</p>
+                            <p class="text-gray-400 text-sm">Please try again</p>
+                        </div>
+                    `;
+                }
+            }
         </script>
     </body>
     </html>
