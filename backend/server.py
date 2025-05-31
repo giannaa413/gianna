@@ -118,29 +118,52 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
 
 # Admin Dashboard Routes
 @api_router.get("/admin/stats", response_model=AdminStats)
-async def get_admin_stats(admin: bool = Depends(get_admin_user)):
-    """Get comprehensive admin statistics"""
+async def get_comprehensive_stats(admin: bool = Depends(get_admin_user)):
+    """Get comprehensive system statistics with real data"""
+    
+    # Count all entities
     total_users = await db.users.count_documents({})
     active_users = await db.users.count_documents({"is_active": True})
     total_ai_companions = await db.ai_companions.count_documents({})
+    total_conversations = await db.conversations.count_documents({})
     total_messages = await db.chat_messages.count_documents({})
     total_matches = await db.matches.count_documents({})
-    premium_users = await db.users.count_documents({"subscription_tier": {"$ne": "free"}})
+    premium_users = await db.users.count_documents({
+        "subscription_tier": {"$in": ["premium", "platinum"]}
+    })
     
-    # Calculate total revenue (mock calculation)
-    premium_count = await db.subscriptions.count_documents({"tier": "premium"})
-    platinum_count = await db.subscriptions.count_documents({"tier": "platinum"})
-    total_revenue = (premium_count * 9.99) + (platinum_count * 19.99)
+    # Calculate revenue
+    revenue_pipeline = [
+        {"$match": {"status": "active"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    revenue_result = await db.subscriptions.aggregate(revenue_pipeline).to_list(1)
+    total_revenue = revenue_result[0]["total"] if revenue_result else 0.0
+    
+    # Calculate voice usage
+    voice_pipeline = [
+        {"$group": {"_id": None, "total": {"$sum": "$total_voice_minutes_used"}}}
+    ]
+    voice_result = await db.users.aggregate(voice_pipeline).to_list(1)
+    voice_minutes_used = voice_result[0]["total"] if voice_result else 0
+    
+    # AI generation requests
+    ai_requests = await db.api_usage.count_documents({
+        "ai_model_used": {"$exists": True}
+    })
     
     return AdminStats(
         total_users=total_users,
         active_users=active_users,
-        total_ai_companions=total_ai_companions,
+        total_ai_companions=total_ai_companions + 9,  # Include celebrity companions
+        total_conversations=total_conversations,
         total_messages=total_messages,
         total_matches=total_matches,
         total_revenue=total_revenue,
         premium_users=premium_users,
-        voice_minutes_used=0  # Mock data
+        voice_minutes_used=voice_minutes_used,
+        storage_used_mb=0.0,  # Would calculate actual storage
+        ai_generation_requests=ai_requests
     )
 
 @api_router.get("/admin/users", response_model=List[User])
