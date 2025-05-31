@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                        const companions = await apiCall('/admin/ai-companions');
-                        contentArea.innerHTML = `
-                            <h3 class="text-2xl font-bold text-white mb-6">🤖 AI Companion Management</h3>
-                            <div class="grid gap-4">
                                 ${companions ? companions.map(companion => `
                                     <div class="bg-white/10 rounded-xl p-4 flex items-center space-x-4">
                                         <img src="${companion.avatar}" alt="${companion.name}" class="w-16 h-16 rounded-full object-cover">
