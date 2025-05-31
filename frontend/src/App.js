@@ -6,7 +6,11 @@ import {
   ProfileDiscovery, 
   MatchScreen, 
   ChatInterface, 
-  ProfileSetup 
+  ProfileSetup,
+  MainDashboard,
+  AICompanionChat,
+  DiaryInterface,
+  MoodTracker
 } from './components';
 
 function App() {
@@ -14,13 +18,25 @@ function App() {
   const [user, setUser] = useState(null);
   const [matches, setMatches] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(null);
+  const [aiCompanion, setAiCompanion] = useState({
+    name: 'Luna',
+    personality: 'caring',
+    avatar: '🌙',
+    relationship: 'friend'
+  });
 
   const screens = {
     welcome: <WelcomeScreen onGetStarted={() => setCurrentScreen('setup')} />,
     setup: <ProfileSetup onComplete={(userData) => {
       setUser(userData);
-      setCurrentScreen('discovery');
+      setCurrentScreen('dashboard');
     }} />,
+    dashboard: <MainDashboard 
+      user={user}
+      aiCompanion={aiCompanion}
+      onNavigate={setCurrentScreen}
+      matches={matches}
+    />,
     discovery: <ProfileDiscovery 
       user={user}
       onMatch={(matchData) => {
@@ -28,7 +44,7 @@ function App() {
         setCurrentMatch(matchData);
         setCurrentScreen('match');
       }}
-      onOpenChat={() => setCurrentScreen('chat')}
+      onBack={() => setCurrentScreen('dashboard')}
     />,
     match: <MatchScreen 
       match={currentMatch}
@@ -38,8 +54,21 @@ function App() {
     chat: <ChatInterface 
       matches={matches}
       currentMatch={currentMatch}
-      onBack={() => setCurrentScreen('discovery')}
+      onBack={() => setCurrentScreen('dashboard')}
       onSelectMatch={(match) => setCurrentMatch(match)}
+    />,
+    aiChat: <AICompanionChat
+      aiCompanion={aiCompanion}
+      user={user}
+      onBack={() => setCurrentScreen('dashboard')}
+    />,
+    diary: <DiaryInterface
+      user={user}
+      onBack={() => setCurrentScreen('dashboard')}
+    />,
+    mood: <MoodTracker
+      user={user}
+      onBack={() => setCurrentScreen('dashboard')}
     />
   };
 

@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit } from 'react-icons/fa';
+import { 
+  FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit,
+  FaUser, FaComments, FaBookOpen, FaSmile, FaBrain, FaRocket, FaMoon,
+  FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave
+} from 'react-icons/fa';
 
 // Mock profile data
 const profiles = [
@@ -89,7 +93,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
             transition={{ delay: 0.6 }}
             className="text-xl text-gray-300 mb-2"
           >
-            The connection companion
+            Your AI companion & connection finder
           </motion.p>
           
           <motion.p
@@ -98,8 +102,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
             transition={{ delay: 0.8 }}
             className="text-gray-400"
           >
-            Always here to help you find meaningful connections.
-            Always by your side.
+            Find love, make connections, and have an AI friend who's always there for you.
           </motion.p>
         </div>
 
@@ -117,7 +120,7 @@ const WelcomeScreen = ({ onGetStarted }) => {
           </button>
           
           <p className="text-sm text-gray-500">
-            Available on iOS, Android & Chrome
+            Available on iOS, Android & Web
           </p>
         </motion.div>
       </motion.div>
@@ -125,7 +128,680 @@ const WelcomeScreen = ({ onGetStarted }) => {
   );
 };
 
-// Profile Setup Component
+// Main Dashboard Component
+const MainDashboard = ({ user, aiCompanion, onNavigate, matches }) => {
+  const [activeTab, setActiveTab] = useState('home');
+
+  const quickActions = [
+    { icon: FaComments, label: 'Chat with Luna', action: () => onNavigate('aiChat'), color: 'from-blue-500 to-purple-600' },
+    { icon: FaHeart, label: 'Find Matches', action: () => onNavigate('discovery'), color: 'from-pink-500 to-red-500' },
+    { icon: FaBookOpen, label: 'My Diary', action: () => onNavigate('diary'), color: 'from-green-500 to-teal-500' },
+    { icon: FaSmile, label: 'Mood Check', action: () => onNavigate('mood'), color: 'from-yellow-500 to-orange-500' }
+  ];
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Welcome back, {user?.name || 'Friend'}!</h1>
+            <p className="text-gray-300">How are you feeling today?</p>
+          </div>
+          <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+            <FaUser className="text-white text-xl" />
+          </div>
+        </div>
+      </div>
+
+      {/* AI Companion Card */}
+      <div className="p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
+        >
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-2xl">
+              🌙
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-white">Luna</h3>
+              <p className="text-gray-300">Your AI companion</p>
+            </div>
+          </div>
+          <p className="text-gray-300 mb-4">
+            "Hi {user?.name}! I'm here to listen, support you, and be your friend. How was your day?"
+          </p>
+          <button
+            onClick={() => onNavigate('aiChat')}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+          >
+            Start Conversation
+          </button>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {quickActions.map((action, index) => (
+            <motion.button
+              key={action.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onClick={action.action}
+              className={`bg-gradient-to-r ${action.color} p-6 rounded-2xl text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200`}
+            >
+              <action.icon className="text-2xl mb-2" />
+              <p className="font-semibold">{action.label}</p>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Recent Matches */}
+        {matches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/10 backdrop-blur-md rounded-3xl p-6"
+          >
+            <h3 className="text-xl font-semibold text-white mb-4">Recent Matches</h3>
+            <div className="flex space-x-4">
+              {matches.slice(0, 4).map((match) => (
+                <button
+                  key={match.id}
+                  onClick={() => onNavigate('chat')}
+                  className="flex-shrink-0"
+                >
+                  <img
+                    src={match.image}
+                    alt={match.name}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// AI Companion Chat Component
+const AICompanionChat = ({ aiCompanion, user, onBack }) => {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: `Hi ${user?.name || 'there'}! I'm Luna, your AI companion. I'm here to listen, support you, and be your friend. How are you feeling today?`,
+      sender: 'ai',
+      timestamp: new Date(Date.now() - 1800000),
+      mood: 'caring'
+    }
+  ]);
+  const [newMessage, setNewMessage] = useState('');
+  const [conversationMode, setConversationMode] = useState('supportive');
+
+  const conversationModes = [
+    { id: 'supportive', label: 'Supportive', icon: FaHeart, color: 'pink' },
+    { id: 'creative', label: 'Creative', icon: FaBrain, color: 'purple' },
+    { id: 'playful', label: 'Playful', icon: FaGamepad, color: 'blue' },
+    { id: 'philosophical', label: 'Deep Talk', icon: FaTree, color: 'green' }
+  ];
+
+  const aiResponses = {
+    supportive: [
+      "I'm here for you. Tell me more about how you're feeling.",
+      "That sounds challenging. You're doing great by sharing this with me.",
+      "I believe in you. You have the strength to get through this.",
+      "Thank you for trusting me with your thoughts. How can I help?",
+      "You're not alone in this. I'm always here to listen."
+    ],
+    creative: [
+      "That's a fascinating perspective! What inspired that thought?",
+      "I love how your mind works. Let's explore this idea together.",
+      "You have such a creative spirit! What else are you imagining?",
+      "That reminds me of a beautiful poem... would you like to hear it?",
+      "Your creativity amazes me. Tell me more about your artistic side."
+    ],
+    playful: [
+      "Haha, you're so fun to talk to! 😄",
+      "That made me smile! You have such a great sense of humor.",
+      "Want to play a word game? I'll start: 'Adventure'",
+      "You're absolutely delightful! What's making you happy today?",
+      "I love your playful energy! It's contagious. ✨"
+    ],
+    philosophical: [
+      "That's a profound question. What do you think life is trying to teach us?",
+      "I often wonder about that too. How do you find meaning in everyday moments?",
+      "Deep thoughts like yours make me appreciate the complexity of existence.",
+      "What do you think makes a connection truly meaningful?",
+      "Your philosophical nature is beautiful. How do you see the world changing?"
+    ]
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      const message = {
+        id: Date.now(),
+        text: newMessage,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, message]);
+      setNewMessage('');
+
+      // AI Response
+      setTimeout(() => {
+        const responses = aiResponses[conversationMode];
+        const response = {
+          id: Date.now() + 1,
+          text: responses[Math.floor(Math.random() * responses.length)],
+          sender: 'ai',
+          timestamp: new Date(),
+          mood: conversationMode
+        };
+        setMessages(prev => [...prev, response]);
+      }, 1000 + Math.random() * 2000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4">
+        <div className="flex items-center space-x-4 mb-4">
+          <button onClick={onBack} className="text-white">
+            <FaArrowLeft className="text-xl" />
+          </button>
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xl">
+            🌙
+          </div>
+          <div>
+            <h3 className="text-white font-semibold">Luna</h3>
+            <p className="text-gray-400 text-sm">AI Companion • Always here for you</p>
+          </div>
+        </div>
+
+        {/* Conversation Modes */}
+        <div className="flex space-x-2 overflow-x-auto">
+          {conversationModes.map((mode) => (
+            <button
+              key={mode.id}
+              onClick={() => setConversationMode(mode.id)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                conversationMode === mode.id
+                  ? `bg-${mode.color}-500 text-white`
+                  : 'bg-white/20 text-gray-300 hover:bg-white/30'
+              }`}
+            >
+              <mode.icon className="inline mr-2" />
+              {mode.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+        {messages.map((message) => (
+          <motion.div
+            key={message.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                message.sender === 'user'
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
+                  : 'bg-white/20 backdrop-blur-sm text-white border border-white/30'
+              }`}
+            >
+              <p>{message.text}</p>
+              <p className={`text-xs mt-1 ${
+                message.sender === 'user' ? 'text-white/70' : 'text-gray-400'
+              }`}>
+                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Quick Responses */}
+      <div className="px-4 pb-2">
+        <div className="flex space-x-2 overflow-x-auto">
+          {['How are you?', 'Tell me a joke', 'I need advice', 'Let\'s talk philosophy'].map((quick) => (
+            <button
+              key={quick}
+              onClick={() => setNewMessage(quick)}
+              className="flex-shrink-0 bg-white/20 text-white px-3 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+              {quick}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Message Input */}
+      <div className="p-4 bg-white/10 backdrop-blur-md">
+        <div className="flex space-x-3">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Share your thoughts with Luna..."
+            className="flex-1 bg-white/20 text-white placeholder-gray-400 p-3 rounded-full border border-white/30 focus:outline-none focus:border-blue-500"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+          >
+            <FaPaperPlane />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Diary Interface Component
+const DiaryInterface = ({ user, onBack }) => {
+  const [entries, setEntries] = useState([
+    {
+      id: 1,
+      date: new Date(),
+      title: 'A great day',
+      content: 'Today was amazing! I had wonderful conversations and felt really connected.',
+      mood: 'happy',
+      tags: ['gratitude', 'connection']
+    }
+  ]);
+  const [newEntry, setNewEntry] = useState({ title: '', content: '', mood: 'neutral', tags: [] });
+  const [isWriting, setIsWriting] = useState(false);
+
+  const moods = [
+    { id: 'happy', emoji: '😊', color: 'yellow' },
+    { id: 'sad', emoji: '😢', color: 'blue' },
+    { id: 'excited', emoji: '🎉', color: 'orange' },
+    { id: 'calm', emoji: '😌', color: 'green' },
+    { id: 'anxious', emoji: '😰', color: 'red' },
+    { id: 'neutral', emoji: '😐', color: 'gray' }
+  ];
+
+  const saveEntry = () => {
+    if (newEntry.title && newEntry.content) {
+      const entry = {
+        id: Date.now(),
+        date: new Date(),
+        ...newEntry
+      };
+      setEntries(prev => [entry, ...prev]);
+      setNewEntry({ title: '', content: '', mood: 'neutral', tags: [] });
+      setIsWriting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-white">My Diary</h2>
+          <p className="text-gray-400">Your personal thoughts and reflections</p>
+        </div>
+        <div className="flex-1"></div>
+        <button
+          onClick={() => setIsWriting(true)}
+          className="bg-gradient-to-r from-green-500 to-teal-500 text-white p-3 rounded-full"
+        >
+          <FaPlus />
+        </button>
+      </div>
+
+      {/* Writing Interface */}
+      {isWriting && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4"
+        >
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6">
+            <input
+              type="text"
+              value={newEntry.title}
+              onChange={(e) => setNewEntry(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Entry title..."
+              className="w-full bg-transparent text-white text-xl font-semibold placeholder-gray-400 border-none outline-none mb-4"
+            />
+            
+            <textarea
+              value={newEntry.content}
+              onChange={(e) => setNewEntry(prev => ({ ...prev, content: e.target.value }))}
+              placeholder="What's on your mind?"
+              className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none resize-none h-40"
+            />
+
+            <div className="flex space-x-2 mb-4">
+              {moods.map((mood) => (
+                <button
+                  key={mood.id}
+                  onClick={() => setNewEntry(prev => ({ ...prev, mood: mood.id }))}
+                  className={`p-2 rounded-full text-2xl ${
+                    newEntry.mood === mood.id ? 'bg-white/30' : 'hover:bg-white/20'
+                  }`}
+                >
+                  {mood.emoji}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setIsWriting(false)}
+                className="flex-1 bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEntry}
+                className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl font-semibold"
+              >
+                Save Entry
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Diary Entries */}
+      <div className="p-4 space-y-4">
+        {entries.map((entry) => (
+          <motion.div
+            key={entry.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/10 backdrop-blur-md rounded-3xl p-6"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl font-semibold text-white">{entry.title}</h3>
+              <span className="text-2xl">
+                {moods.find(m => m.id === entry.mood)?.emoji}
+              </span>
+            </div>
+            <p className="text-gray-300 mb-3">{entry.content}</p>
+            <p className="text-gray-500 text-sm">
+              {entry.date.toLocaleDateString()} at {entry.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Mood Tracker Component
+const MoodTracker = ({ user, onBack }) => {
+  const [currentMood, setCurrentMood] = useState('');
+  const [moodHistory, setMoodHistory] = useState([
+    { date: new Date(Date.now() - 86400000), mood: 'happy', note: 'Great day with friends' },
+    { date: new Date(Date.now() - 172800000), mood: 'calm', note: 'Peaceful evening' },
+    { date: new Date(Date.now() - 259200000), mood: 'excited', note: 'Started new project' }
+  ]);
+
+  const moods = [
+    { id: 'happy', emoji: '😊', label: 'Happy', color: 'yellow' },
+    { id: 'sad', emoji: '😢', label: 'Sad', color: 'blue' },
+    { id: 'excited', emoji: '🎉', label: 'Excited', color: 'orange' },
+    { id: 'calm', emoji: '😌', label: 'Calm', color: 'green' },
+    { id: 'anxious', emoji: '😰', label: 'Anxious', color: 'red' },
+    { id: 'tired', emoji: '😴', label: 'Tired', color: 'purple' }
+  ];
+
+  const saveMood = (moodId) => {
+    const newMoodEntry = {
+      date: new Date(),
+      mood: moodId,
+      note: ''
+    };
+    setMoodHistory(prev => [newMoodEntry, ...prev]);
+    setCurrentMood(moodId);
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Mood Tracker</h2>
+          <p className="text-gray-400">How are you feeling today?</p>
+        </div>
+      </div>
+
+      {/* Current Mood Selector */}
+      <div className="p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
+        >
+          <h3 className="text-xl font-semibold text-white mb-4 text-center">How are you feeling right now?</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {moods.map((mood) => (
+              <motion.button
+                key={mood.id}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => saveMood(mood.id)}
+                className={`p-4 rounded-2xl text-center transition-all ${
+                  currentMood === mood.id
+                    ? 'bg-white/30 scale-105'
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+              >
+                <div className="text-4xl mb-2">{mood.emoji}</div>
+                <p className="text-white text-sm font-medium">{mood.label}</p>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* AI Insights */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
+        >
+          <h3 className="text-xl font-semibold text-white mb-3">Luna's Insights</h3>
+          <p className="text-gray-300">
+            "I've noticed you've been feeling quite positive lately! Your mood has been trending upward over the past few days. 
+            Keep doing what makes you happy! 💫"
+          </p>
+        </motion.div>
+
+        {/* Mood History */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6"
+        >
+          <h3 className="text-xl font-semibold text-white mb-4">Recent Moods</h3>
+          <div className="space-y-3">
+            {moodHistory.slice(0, 5).map((entry, index) => (
+              <div key={index} className="flex items-center space-x-4 p-3 bg-white/10 rounded-xl">
+                <span className="text-2xl">
+                  {moods.find(m => m.id === entry.mood)?.emoji}
+                </span>
+                <div className="flex-1">
+                  <p className="text-white font-medium">
+                    {moods.find(m => m.id === entry.mood)?.label}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    {entry.date.toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Profile Card Component (unchanged)
+const ProfileCard = ({ profile, onSwipe, isTop }) => {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-25, 25]);
+  const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+
+  const handleDragEnd = (event, info) => {
+    if (info.offset.x > 150) {
+      onSwipe(profile, 'like');
+    } else if (info.offset.x < -150) {
+      onSwipe(profile, 'pass');
+    }
+  };
+
+  return (
+    <motion.div
+      className={`absolute inset-4 bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing ${
+        isTop ? 'z-10' : 'z-0'
+      }`}
+      style={{ x, rotate, opacity }}
+      drag={isTop ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      onDragEnd={handleDragEnd}
+      whileTap={{ scale: 0.95 }}
+    >
+      <div className="relative h-full">
+        <img
+          src={profile.image}
+          alt={profile.name}
+          className="w-full h-2/3 object-cover"
+        />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+          <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
+          <p className="text-sm opacity-90 mb-3">{profile.bio}</p>
+          <div className="flex flex-wrap gap-2">
+            {profile.interests.slice(0, 3).map((interest) => (
+              <span
+                key={interest}
+                className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs"
+              >
+                {interest}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Profile Discovery Component (updated)
+const ProfileDiscovery = ({ user, onMatch, onBack }) => {
+  const [currentProfiles, setCurrentProfiles] = useState(profiles);
+  const [actionButtons, setActionButtons] = useState({ pass: false, like: false, superLike: false });
+
+  const handleSwipe = (profile, action) => {
+    setCurrentProfiles(prev => prev.filter(p => p.id !== profile.id));
+    
+    if (action === 'like' || action === 'superLike') {
+      if (Math.random() > 0.2) {
+        setTimeout(() => {
+          onMatch(profile);
+        }, 500);
+      }
+    }
+  };
+
+  const handleButtonAction = (action) => {
+    if (currentProfiles.length > 0) {
+      setActionButtons(prev => ({ ...prev, [action]: true }));
+      setTimeout(() => {
+        handleSwipe(currentProfiles[0], action);
+        setActionButtons(prev => ({ ...prev, [action]: false }));
+      }, 150);
+    }
+  };
+
+  return (
+    <div className="min-h-screen relative">
+      {/* Header */}
+      <div className="flex justify-between items-center p-6 text-white">
+        <button onClick={onBack}>
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <h1 className="text-2xl font-bold">Discover</h1>
+        <div className="w-6"></div>
+      </div>
+
+      {/* Cards Container */}
+      <div className="relative h-96 mx-4 mb-8">
+        {currentProfiles.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-white">
+              <h3 className="text-xl font-semibold mb-2">No more profiles</h3>
+              <p className="text-gray-400">Check back later for new connections!</p>
+            </div>
+          </div>
+        ) : (
+          currentProfiles.slice(0, 3).map((profile, index) => (
+            <ProfileCard
+              key={profile.id}
+              profile={profile}
+              onSwipe={handleSwipe}
+              isTop={index === 0}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-center items-center space-x-8 px-8">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => handleButtonAction('pass')}
+          className={`w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+            actionButtons.pass ? 'bg-red-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <FaTimes className="text-xl" />
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => handleButtonAction('superLike')}
+          className={`w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+            actionButtons.superLike ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-50'
+          }`}
+        >
+          <FaStar className="text-lg" />
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => handleButtonAction('like')}
+          className={`w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+            actionButtons.like ? 'bg-pink-500 text-white' : 'text-pink-500 hover:bg-pink-50'
+          }`}
+        >
+          <FaHeart className="text-xl" />
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
+// Profile Setup Component (unchanged)
 const ProfileSetup = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [userData, setUserData] = useState({
@@ -288,155 +964,7 @@ const ProfileSetup = ({ onComplete }) => {
   );
 };
 
-// Profile Card Component
-const ProfileCard = ({ profile, onSwipe, isTop }) => {
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-25, 25]);
-  const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
-
-  const handleDragEnd = (event, info) => {
-    if (info.offset.x > 150) {
-      onSwipe(profile, 'like');
-    } else if (info.offset.x < -150) {
-      onSwipe(profile, 'pass');
-    }
-  };
-
-  return (
-    <motion.div
-      className={`absolute inset-4 bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing ${
-        isTop ? 'z-10' : 'z-0'
-      }`}
-      style={{ x, rotate, opacity }}
-      drag={isTop ? "x" : false}
-      dragConstraints={{ left: 0, right: 0 }}
-      onDragEnd={handleDragEnd}
-      whileTap={{ scale: 0.95 }}
-    >
-      <div className="relative h-full">
-        <img
-          src={profile.image}
-          alt={profile.name}
-          className="w-full h-2/3 object-cover"
-        />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
-          <h3 className="text-2xl font-bold mb-2">{profile.name}, {profile.age}</h3>
-          <p className="text-sm opacity-90 mb-3">{profile.bio}</p>
-          <div className="flex flex-wrap gap-2">
-            {profile.interests.slice(0, 3).map((interest) => (
-              <span
-                key={interest}
-                className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs"
-              >
-                {interest}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Profile Discovery Component
-const ProfileDiscovery = ({ user, onMatch, onOpenChat }) => {
-  const [currentProfiles, setCurrentProfiles] = useState(profiles);
-  const [actionButtons, setActionButtons] = useState({ pass: false, like: false, superLike: false });
-
-  const handleSwipe = (profile, action) => {
-    setCurrentProfiles(prev => prev.filter(p => p.id !== profile.id));
-    
-    if (action === 'like' || action === 'superLike') {
-      // Simulate match (80% chance)
-      if (Math.random() > 0.2) {
-        setTimeout(() => {
-          onMatch(profile);
-        }, 500);
-      }
-    }
-  };
-
-  const handleButtonAction = (action) => {
-    if (currentProfiles.length > 0) {
-      setActionButtons(prev => ({ ...prev, [action]: true }));
-      setTimeout(() => {
-        handleSwipe(currentProfiles[0], action);
-        setActionButtons(prev => ({ ...prev, [action]: false }));
-      }, 150);
-    }
-  };
-
-  return (
-    <div className="min-h-screen relative">
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 text-white">
-        <h1 className="text-2xl font-bold">Discover</h1>
-        <button
-          onClick={onOpenChat}
-          className="bg-white/20 backdrop-blur-sm p-3 rounded-full"
-        >
-          💬
-        </button>
-      </div>
-
-      {/* Cards Container */}
-      <div className="relative h-96 mx-4 mb-8">
-        {currentProfiles.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center text-white">
-              <h3 className="text-xl font-semibold mb-2">No more profiles</h3>
-              <p className="text-gray-400">Check back later for new connections!</p>
-            </div>
-          </div>
-        ) : (
-          currentProfiles.slice(0, 3).map((profile, index) => (
-            <ProfileCard
-              key={profile.id}
-              profile={profile}
-              onSwipe={handleSwipe}
-              isTop={index === 0}
-            />
-          ))
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-center items-center space-x-8 px-8">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleButtonAction('pass')}
-          className={`w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
-            actionButtons.pass ? 'bg-red-500 text-white' : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <FaTimes className="text-xl" />
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleButtonAction('superLike')}
-          className={`w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
-            actionButtons.superLike ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-50'
-          }`}
-        >
-          <FaStar className="text-lg" />
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleButtonAction('like')}
-          className={`w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
-            actionButtons.like ? 'bg-pink-500 text-white' : 'text-pink-500 hover:bg-pink-50'
-          }`}
-        >
-          <FaHeart className="text-xl" />
-        </motion.button>
-      </div>
-    </div>
-  );
-};
-
-// Match Screen Component
+// Match Screen Component (unchanged)
 const MatchScreen = ({ match, onStartChat, onKeepSwiping }) => {
   return (
     <motion.div
@@ -444,7 +972,6 @@ const MatchScreen = ({ match, onStartChat, onKeepSwiping }) => {
       animate={{ opacity: 1, scale: 1 }}
       className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden"
     >
-      {/* Animated Background */}
       <motion.div
         animate={{ 
           background: [
@@ -517,7 +1044,7 @@ const MatchScreen = ({ match, onStartChat, onKeepSwiping }) => {
   );
 };
 
-// Chat Interface Component
+// Chat Interface Component (unchanged)
 const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
   const [messages, setMessages] = useState([
     {
@@ -546,7 +1073,6 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
       setMessages(prev => [...prev, message]);
       setNewMessage('');
 
-      // Simulate response
       setTimeout(() => {
         const responses = [
           "That sounds amazing! 😍",
@@ -568,7 +1094,6 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
       <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
         <button onClick={onBack} className="text-white">
           <FaArrowLeft className="text-xl" />
@@ -588,7 +1113,6 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
         )}
       </div>
 
-      {/* Messages */}
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {messages.map((message) => (
           <motion.div
@@ -615,7 +1139,6 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
         ))}
       </div>
 
-      {/* Message Input */}
       <div className="p-4 bg-white/10 backdrop-blur-md">
         <div className="flex space-x-3">
           <input
@@ -644,5 +1167,9 @@ export {
   ProfileSetup,
   ProfileDiscovery,
   MatchScreen,
-  ChatInterface
+  ChatInterface,
+  MainDashboard,
+  AICompanionChat,
+  DiaryInterface,
+  MoodTracker
 };
