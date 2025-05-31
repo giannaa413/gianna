@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                                            <button onclick="editCompanion('${companion.id}')" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">Edit</button>
-                                            <button onclick="deleteCompanion('${companion.id}')" class="bg-red-500 text-white px-4 py-2 rounded text-sm">Delete</button>
-                                        </div>
-                                    </div>
                                 `).join('') : '<p class="text-white text-center">No companions found</p>'}
                             </div>
                         `;
