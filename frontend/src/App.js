@@ -13,7 +13,11 @@ import {
   MoodTracker,
   AICompanionSelector,
   AICompanionCreator,
-  AICompanionManager
+  AICompanionManager,
+  PaywallScreen,
+  SubscriptionScreen,
+  VoiceChatInterface,
+  CreditsStore
 } from './components';
 
 function App() {
@@ -21,6 +25,13 @@ function App() {
   const [user, setUser] = useState(null);
   const [matches, setMatches] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(null);
+  const [subscription, setSubscription] = useState({
+    tier: 'free', // free, premium, platinum
+    credits: 10,
+    voiceMinutes: 0,
+    unlimitedMessages: false,
+    expiresAt: null
+  });
   const [aiCompanions, setAiCompanions] = useState([
     {
       id: 1,
@@ -30,6 +41,8 @@ function App() {
       emoji: '🌙',
       description: 'A caring and empathetic companion who loves deep conversations',
       traits: ['Empathetic', 'Wise', 'Supportive'],
+      voiceEnabled: false,
+      isPremium: false,
       isActive: true
     },
     {
@@ -40,6 +53,8 @@ function App() {
       emoji: '🎨',
       description: 'An artistic soul who inspires creativity and imagination',
       traits: ['Creative', 'Inspiring', 'Artistic'],
+      voiceEnabled: true,
+      isPremium: true,
       isActive: false
     },
     {
@@ -50,10 +65,36 @@ function App() {
       emoji: '⚡',
       description: 'An energetic companion who loves adventures and new experiences',
       traits: ['Energetic', 'Adventurous', 'Optimistic'],
+      voiceEnabled: true,
+      isPremium: true,
       isActive: false
     }
   ]);
   const [activeCompanion, setActiveCompanion] = useState(aiCompanions[0]);
+
+  // Check if user can perform action based on subscription
+  const canPerformAction = (actionType) => {
+    switch (actionType) {
+      case 'message':
+        return subscription.tier !== 'free' || subscription.credits > 0;
+      case 'voice_chat':
+        return subscription.tier !== 'free' && subscription.voiceMinutes > 0;
+      case 'unlimited_swipes':
+        return subscription.tier === 'platinum';
+      case 'premium_companions':
+        return subscription.tier !== 'free';
+      default:
+        return true;
+    }
+  };
+
+  const useCredit = () => {
+    if (subscription.tier === 'free' && subscription.credits > 0) {
+      setSubscription(prev => ({ ...prev, credits: prev.credits - 1 }));
+      return true;
+    }
+    return subscription.tier !== 'free';
+  };
 
   const screens = {
     welcome: <WelcomeScreen onGetStarted={() => setCurrentScreen('setup')} />,
@@ -61,9 +102,38 @@ function App() {
       setUser(userData);
       setCurrentScreen('aiSelector');
     }} />,
+    paywall: <PaywallScreen 
+      subscription={subscription}
+      onUpgrade={(newSub) => {
+        setSubscription(newSub);
+        setCurrentScreen('dashboard');
+      }}
+      onBack={() => setCurrentScreen('dashboard')}
+    />,
+    subscription: <SubscriptionScreen
+      subscription={subscription}
+      onSubscribe={(newSub) => {
+        setSubscription(newSub);
+        setCurrentScreen('dashboard');
+      }}
+      onBack={() => setCurrentScreen('dashboard')}
+    />,
+    credits: <CreditsStore
+      subscription={subscription}
+      onPurchase={(updatedSub) => {
+        setSubscription(updatedSub);
+        setCurrentScreen('dashboard');
+      }}
+      onBack={() => setCurrentScreen('dashboard')}
+    />,
     aiSelector: <AICompanionSelector 
       companions={aiCompanions}
+      subscription={subscription}
       onSelectCompanion={(companion) => {
+        if (companion.isPremium && !canPerformAction('premium_companions')) {
+          setCurrentScreen('paywall');
+          return;
+        }
         setActiveCompanion(companion);
         setAiCompanions(prev => prev.map(c => ({
           ...c,
@@ -74,7 +144,12 @@ function App() {
       onCreateNew={() => setCurrentScreen('aiCreator')}
     />,
     aiCreator: <AICompanionCreator
+      subscription={subscription}
       onComplete={(newCompanion) => {
+        if (newCompanion.isPremium && !canPerformAction('premium_companions')) {
+          setCurrentScreen('paywall');
+          return;
+        }
         const companionWithId = { ...newCompanion, id: Date.now(), isActive: true };
         setAiCompanions(prev => [...prev.map(c => ({ ...c, isActive: false })), companionWithId]);
         setActiveCompanion(companionWithId);
@@ -85,13 +160,19 @@ function App() {
     dashboard: <MainDashboard 
       user={user}
       aiCompanion={activeCompanion}
+      subscription={subscription}
       onNavigate={setCurrentScreen}
       matches={matches}
     />,
     aiManager: <AICompanionManager
       companions={aiCompanions}
       activeCompanion={activeCompanion}
+      subscription={subscription}
       onSelectCompanion={(companion) => {
+        if (companion.isPremium && !canPerformAction('premium_companions')) {
+          setCurrentScreen('paywall');
+          return;
+        }
         setActiveCompanion(companion);
         setAiCompanions(prev => prev.map(c => ({
           ...c,
@@ -110,11 +191,13 @@ function App() {
     />,
     discovery: <ProfileDiscovery 
       user={user}
+      subscription={subscription}
       onMatch={(matchData) => {
         setMatches(prev => [...prev, matchData]);
         setCurrentMatch(matchData);
         setCurrentScreen('match');
       }}
+      onUpgradeRequired={() => setCurrentScreen('paywall')}
       onBack={() => setCurrentScreen('dashboard')}
     />,
     match: <MatchScreen 
@@ -125,13 +208,33 @@ function App() {
     chat: <ChatInterface 
       matches={matches}
       currentMatch={currentMatch}
+      subscription={subscription}
       onBack={() => setCurrentScreen('dashboard')}
       onSelectMatch={(match) => setCurrentMatch(match)}
+      onUpgradeRequired={() => setCurrentScreen('paywall')}
+      useCredit={useCredit}
     />,
     aiChat: <AICompanionChat
       aiCompanion={activeCompanion}
       user={user}
+      subscription={subscription}
       onBack={() => setCurrentScreen('dashboard')}
+      onVoiceChat={() => setCurrentScreen('voiceChat')}
+      onUpgradeRequired={() => setCurrentScreen('paywall')}
+      useCredit={useCredit}
+    />,
+    voiceChat: <VoiceChatInterface
+      aiCompanion={activeCompanion}
+      user={user}
+      subscription={subscription}
+      onBack={() => setCurrentScreen('aiChat')}
+      onUpgradeRequired={() => setCurrentScreen('paywall')}
+      onUseVoiceMinute={() => {
+        setSubscription(prev => ({ 
+          ...prev, 
+          voiceMinutes: Math.max(0, prev.voiceMinutes - 1) 
+        }));
+      }}
     />,
     diary: <DiaryInterface
       user={user}
