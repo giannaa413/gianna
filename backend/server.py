@@ -724,6 +724,102 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
+
+                    case 'companions':
+                        const companions = await apiCall('/admin/ai-companions/all');
+                        const celebrities = await apiCall('/celebrity-companions');
+                        contentArea.innerHTML = `
+                            <h3 class="text-2xl font-bold text-white mb-6">🤖 AI Companion Management</h3>
+                            
+                            <!-- Celebrity Companions Section -->
+                            <div class="mb-8">
+                                <h4 class="text-xl font-semibold text-white mb-4">⭐ 系统内置明星级AI伴侣 (9个)</h4>
+                                <p class="text-gray-400 mb-4">这些是平台预设的完美虚拟人物，用户无法删除</p>
+                                <div class="grid gap-4">
+                                    ${celebrities ? celebrities.map(companion => `
+                                        <div class="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-yellow-500/30 rounded-xl p-4 flex items-center space-x-4">
+                                            <img src="${companion.avatar_url}" alt="${companion.name}" class="w-20 h-20 rounded-full object-cover border-2 border-yellow-500">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <h4 class="text-xl font-semibold text-white">${companion.name}</h4>
+                                                    <span class="text-2xl">${companion.emoji}</span>
+                                                    <span class="bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">CELEBRITY</span>
+                                                    <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs">系统内置</span>
+                                                </div>
+                                                <p class="text-gray-300 mb-2">${companion.description}</p>
+                                                <div class="flex gap-2 mb-2">
+                                                    ${companion.traits.map(trait => `<span class="bg-white/20 text-white px-2 py-1 rounded-full text-xs">${trait}</span>`).join('')}
+                                                </div>
+                                                <div class="text-sm text-gray-400">
+                                                    <span>性格: ${companion.personality}</span> • 
+                                                    <span>年龄外观: ${companion.age_appearance}</span> • 
+                                                    <span>风格: ${companion.style_aesthetic}</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-yellow-400 font-semibold">🔒 不可删除</p>
+                                                <p class="text-gray-400 text-sm">系统保护</p>
+                                                <button onclick="viewCompanionDetails('${companion.id}')" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded text-sm">查看详情</button>
+                                            </div>
+                                        </div>
+                                    `).join('') : '<p class="text-white text-center">加载中...</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- User Created Companions Section -->
+                            <div>
+                                <h4 class="text-xl font-semibold text-white mb-4">👤 用户创建的AI伴侣</h4>
+                                <p class="text-gray-400 mb-4">用户可以删除自己创建的AI伴侣，不能删除别人的</p>
+                                <div class="grid gap-4">
+                                    ${companions && companions.user_companions ? companions.user_companions.map(companion => `
+                                        <div class="bg-white/10 rounded-xl p-4 flex items-center space-x-4">
+                                            <img src="${companion.avatar_url}" alt="${companion.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white/30">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <h4 class="text-xl font-semibold text-white">${companion.name}</h4>
+                                                    <span class="text-2xl">${companion.emoji || '🤖'}</span>
+                                                    <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">用户创建</span>
+                                                    ${companion.is_premium ? '<span class="bg-purple-500 text-white px-2 py-1 rounded-full text-xs">Premium</span>' : ''}
+                                                </div>
+                                                <p class="text-gray-300 mb-2">${companion.description}</p>
+                                                <div class="flex gap-2 mb-2">
+                                                    ${companion.traits ? companion.traits.map(trait => `<span class="bg-white/20 text-white px-2 py-1 rounded-full text-xs">${trait}</span>`).join('') : ''}
+                                                </div>
+                                                <p class="text-sm text-gray-400">创建者: ${companion.created_by || '用户'} • 创建时间: ${companion.created_at ? new Date(companion.created_at).toLocaleDateString() : '未知'}</p>
+                                            </div>
+                                            <div class="flex flex-col space-y-2">
+                                                <button onclick="editCompanion('${companion.id}')" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">编辑</button>
+                                                <button onclick="deleteUserCompanion('${companion.id}', '${companion.created_by}')" class="bg-red-500 text-white px-4 py-2 rounded text-sm">删除</button>
+                                            </div>
+                                        </div>
+                                    `).join('') : '<p class="text-white text-center">暂无用户创建的AI伴侣</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- Statistics -->
+                            <div class="mt-8 bg-white/10 rounded-xl p-6">
+                                <h4 class="text-xl font-semibold text-white mb-4">📊 AI伴侣统计</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                                        <p class="text-2xl font-bold text-yellow-400">9</p>
+                                        <p class="text-gray-300 text-sm">明星级伴侣</p>
+                                    </div>
+                                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                                        <p class="text-2xl font-bold text-green-400">${companions ? companions.total_user_created : 0}</p>
+                                        <p class="text-gray-300 text-sm">用户创建</p>
+                                    </div>
+                                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                                        <p class="text-2xl font-bold text-blue-400">${companions ? companions.total_celebrity + companions.total_user_created : 9}</p>
+                                        <p class="text-gray-300 text-sm">总数量</p>
+                                    </div>
+                                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                                        <p class="text-2xl font-bold text-purple-400">100%</p>
+                                        <p class="text-gray-300 text-sm">在线率</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
                         
                     case 'database':
                         contentArea.innerHTML = `
