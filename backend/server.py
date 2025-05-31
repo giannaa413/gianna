@@ -166,49 +166,214 @@ async def get_comprehensive_stats(admin: bool = Depends(get_admin_user)):
         ai_generation_requests=ai_requests
     )
 
-@api_router.get("/admin/users", response_model=List[User])
-async def get_all_users(
-    admin: bool = Depends(get_admin_user),
-    skip: int = Query(0),
-    limit: int = Query(100)
-):
-    """Get all users with pagination"""
-    users = await db.users.find().skip(skip).limit(limit).to_list(length=limit)
-    return [User(**user) for user in users]
+# Celebrity AI Companions Management
+@api_router.get("/celebrity-companions")
+async def get_celebrity_companions_api():
+    """Get all 9 system celebrity AI companions"""
+    return get_celebrity_companions()
 
-@api_router.get("/admin/ai-companions", response_model=List[AICompanion])
-async def get_all_ai_companions(admin: bool = Depends(get_admin_user)):
-    """Get all AI companions"""
-    companions = await db.ai_companions.find().to_list(length=1000)
-    return [AICompanion(**companion) for companion in companions]
-
-@api_router.post("/admin/ai-companions", response_model=AICompanion)
-async def create_ai_companion(companion: AICompanion, admin: bool = Depends(get_admin_user)):
-    """Create new AI companion"""
-    companion_dict = companion.dict()
-    await db.ai_companions.insert_one(companion_dict)
+@api_router.get("/celebrity-companions/{companion_id}")
+async def get_celebrity_companion(companion_id: str):
+    """Get specific celebrity AI companion"""
+    companion = get_companion_by_id(companion_id)
+    if not companion:
+        raise HTTPException(status_code=404, detail="Celebrity companion not found")
     return companion
 
-@api_router.put("/admin/ai-companions/{companion_id}")
-async def update_ai_companion(
+# Digital Human Generation Endpoints
+@api_router.post("/digital-human/generate-from-photo")
+async def generate_digital_human_from_photo(
+    background_tasks: BackgroundTasks,
+    user_id: str,
+    style: str = "enhanced"
+):
+    """Generate digital human from user photo"""
+    # In production, this would handle file upload
+    # For demo, we'll simulate with mock photo data
+    mock_photo_data = b"mock_photo_data_for_demo"
+    
+    result = await digital_human_service.generate_from_photo(
+        mock_photo_data, 
+        style
+    )
+    
+    if result["success"]:
+        # Store in database
+        digital_human = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "creation_method": "photo_based",
+            "avatar_url": result["generated_avatar"],
+            "variations": result["variations"],
+            "style": style,
+            "generation_metadata": result["generation_metadata"],
+            "created_at": datetime.utcnow()
+        }
+        
+        await db.ai_companions.insert_one(digital_human)
+        
+        return {
+            "message": "Digital human generated successfully",
+            "digital_human": digital_human,
+            "generation_result": result
+        }
+    else:
+        raise HTTPException(status_code=500, detail=result["error"])
+
+@api_router.post("/digital-human/create-ai-companion")
+async def create_ai_digital_human(
+    user_id: str,
+    description: str,
+    personality: str,
+    style: str = "realistic",
+    custom_features: Optional[dict] = None
+):
+    """Create completely AI-generated digital human companion"""
+    
+    result = await digital_human_service.generate_ai_created(
+        description, personality, style, custom_features
+    )
+    
+    if result["success"]:
+        # Create AI companion record
+        companion = AICompanion(
+            name=f"Custom AI for User {user_id}",
+            personality=AIPersonalityType.caring,  # Default, can be customized
+            avatar_url=result["generated_avatar"],
+            avatar_generation_prompt=result["prompt_used"],
+            description=description,
+            traits=["AI-Generated", "Custom", personality.title()],
+            is_premium=False,
+            voice_enabled=True,
+            created_by=user_id,
+            avatar_variations=result["variations"]
+        )
+        
+        await db.ai_companions.insert_one(companion.dict())
+        
+        return {
+            "message": "AI digital human created successfully",
+            "companion": companion,
+            "generation_result": result
+        }
+    else:
+        raise HTTPException(status_code=500, detail=result["error"])
+
+@api_router.post("/digital-human/create-digital-twin")
+async def create_digital_twin(
+    user_id: str,
+    user_data: dict
+):
+    """Create user's digital twin"""
+    
+    result = await digital_human_service.create_digital_twin(user_data)
+    
+    if result["success"]:
+        # Store digital twin
+        digital_twin = {
+            "id": result["twin_id"],
+            "user_id": user_id,
+            "type": "digital_twin",
+            "avatar": result["avatar"],
+            "voice_clone": result.get("voice_clone"),
+            "characteristics": result["characteristics"],
+            "capabilities": result["capabilities"],
+            "created_at": datetime.utcnow()
+        }
+        
+        await db.ai_companions.insert_one(digital_twin)
+        
+        return {
+            "message": "Digital twin created successfully",
+            "digital_twin": digital_twin
+        }
+    else:
+        raise HTTPException(status_code=500, detail=result["error"])
+
+@api_router.get("/digital-human/styles")
+async def get_available_styles():
+    """Get available generation styles"""
+    return {
+        "avatar_styles": digital_human_service.get_available_styles(),
+        "generation_modes": digital_human_service.get_generation_modes()
+    }
+
+# Enhanced AI Companion Management with Permission Control
+@api_router.get("/admin/ai-companions/all")
+async def get_all_ai_companions_admin(admin: bool = Depends(get_admin_user)):
+    """Get all AI companions including celebrities and user-created"""
+    
+    # Get celebrity companions
+    celebrity_companions = get_celebrity_companions()
+    
+    # Get user-created companions
+    user_companions = await db.ai_companions.find().to_list(length=1000)
+    user_companions_formatted = [AICompanion(**comp) for comp in user_companions]
+    
+    return {
+        "celebrity_companions": celebrity_companions,
+        "user_companions": user_companions_formatted,
+        "total_celebrity": len(celebrity_companions),
+        "total_user_created": len(user_companions_formatted)
+    }
+
+@api_router.delete("/ai-companions/{companion_id}")
+async def delete_ai_companion_with_permission_check(
     companion_id: str,
-    companion: AICompanion,
+    user_id: str,
     admin: bool = Depends(get_admin_user)
 ):
-    """Update AI companion"""
-    await db.ai_companions.update_one(
-        {"id": companion_id},
-        {"$set": companion.dict()}
-    )
-    return {"message": "AI companion updated successfully"}
-
-@api_router.delete("/admin/ai-companions/{companion_id}")
-async def delete_ai_companion(companion_id: str, admin: bool = Depends(get_admin_user)):
-    """Delete AI companion"""
+    """Delete AI companion with permission checking"""
+    
+    # Check if it's a system companion (cannot be deleted)
+    if is_system_companion(companion_id):
+        raise HTTPException(
+            status_code=403, 
+            detail="系统内置的明星AI伴侣不能被删除"
+        )
+    
+    # Get companion from database
+    companion = await db.ai_companions.find_one({"id": companion_id})
+    if not companion:
+        raise HTTPException(status_code=404, detail="AI companion not found")
+    
+    # Check if user can delete this companion
+    if not admin and companion.get("created_by") != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="您只能删除自己创建的AI伴侣"
+        )
+    
+    # Delete the companion
     result = await db.ai_companions.delete_one({"id": companion_id})
+    
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="AI companion not found")
+    
     return {"message": "AI companion deleted successfully"}
+
+@api_router.get("/user/{user_id}/ai-companions")
+async def get_user_ai_companions(user_id: str):
+    """Get AI companions created by specific user"""
+    
+    # Get user-created companions
+    user_companions = await db.ai_companions.find(
+        {"created_by": user_id}
+    ).to_list(length=100)
+    
+    # Get celebrity companions (available to all users)
+    celebrity_companions = get_celebrity_companions()
+    
+    return {
+        "celebrity_companions": celebrity_companions,
+        "user_companions": user_companions,
+        "can_create_more": len(user_companions) < 10,  # Limit user companions
+        "deletion_permissions": {
+            "can_delete_own": True,
+            "can_delete_celebrity": False,
+            "can_delete_others": False
+        }
+    }
 
 @api_router.get("/admin/messages", response_model=List[ChatMessage])
 async def get_all_messages(
