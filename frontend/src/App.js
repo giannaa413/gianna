@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
-import Components from './components';
-
-const { 
+import { 
   WelcomeScreen, 
   ProfileDiscovery, 
   MatchScreen, 
   ChatInterface, 
   ProfileSetup 
-} = Components;
+} from './components';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('welcome');
