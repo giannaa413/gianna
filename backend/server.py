@@ -1078,6 +1078,27 @@ async def admin_dashboard():
                 }
             }
 
+            async function deleteUserCompanion(companionId, createdBy) {
+                if (confirm('确定要删除这个AI伴侣吗？此操作不可恢复！')) {
+                    try {
+                        const result = await apiCall(`/ai-companions/${companionId}?user_id=${createdBy}`, 'DELETE');
+                        if (result) {
+                            alert('AI伴侣删除成功！');
+                            showSection('companions');
+                        } else {
+                            alert('删除失败，您只能删除自己创建的AI伴侣');
+                        }
+                    } catch (error) {
+                        alert('删除失败：' + error.message);
+                    }
+                }
+            }
+
+            function viewCompanionDetails(companionId) {
+                alert(`查看伴侣详情功能将打开 ${companionId} 的详细信息模态框`);
+                // 这里可以添加详细信息查看功能
+            }
+
             async function generateAICompanion() {
                 const name = document.getElementById('gen-name').value;
                 const personality = document.getElementById('gen-personality').value;
