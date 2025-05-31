@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                                `).join('') : '<p class="text-white text-center">No companions found</p>'}
-                            </div>
-                        `;
-                        break;
                         
                     case 'messages':
                         const messages = await apiCall('/admin/messages');
