@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                                            <div class="flex items-center space-x-2">
-                                                <h4 class="text-xl font-semibold text-white">${companion.name}</h4>
-                                                <span class="text-2xl">${companion.emoji}</span>
-                                                ${companion.is_premium ? '<span class="bg-yellow-500 text-black px-2 py-1 rounded-full text-xs">Premium</span>' : ''}
                                             </div>
                                             <p class="text-gray-300">${companion.description}</p>
                                             <div class="flex gap-2 mt-2">
