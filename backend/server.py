@@ -401,6 +401,12 @@ async def admin_dashboard():
                         <button onclick="showSection('companions')" class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition-all">
                             🤖 AI Companions
                         </button>
+                        <button onclick="showSection('database')" class="bg-indigo-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-600 transition-all">
+                            🗄️ Database
+                        </button>
+                        <button onclick="showSection('ai-generator')" class="bg-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-cyan-600 transition-all">
+                            🎨 AI Avatar Generator
+                        </button>
                         <button onclick="showSection('messages')" class="bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all">
                             💬 Messages
                         </button>
