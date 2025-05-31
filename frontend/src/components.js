@@ -538,7 +538,7 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       const message = {
-        id: messages.length + 1,
+        id: Date.now(),
         text: newMessage,
         sender: 'me',
         timestamp: new Date()
@@ -556,7 +556,7 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
           "I think we have a lot in common!"
         ];
         const response = {
-          id: messages.length + 2,
+          id: Date.now() + 1,
           text: responses[Math.floor(Math.random() * responses.length)],
           sender: 'them',
           timestamp: new Date()
