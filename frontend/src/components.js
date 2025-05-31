@@ -4,8 +4,11 @@ import {
   FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit,
   FaUser, FaComments, FaBookOpen, FaSmile, FaBrain, FaRocket, FaMoon,
   FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave,
-  FaCog, FaTrash, FaCheck, FaRandom, FaPalette, FaUserPlus
+  FaCog, FaTrash, FaCheck, FaRandom, FaPalette, FaUserPlus, FaCrown,
+  FaMicrophone, FaMicrophoneSlash, FaPlay, FaPause, FaCreditCard,
+  FaDiamond, FaInfinity, FaLock, FaUnlock, FaVolumeUp, FaHeadphones
 } from 'react-icons/fa';
+import RealtimeAudioChat from './realtimeChat';
 
 // Mock profile data
 const profiles = [
