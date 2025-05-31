@@ -682,10 +682,6 @@ async def admin_dashboard():
                             </div>
                         `;
                         break;
-                                            </div>
-                                            <p class="text-sm text-gray-400 mt-2">Usage: ${companion.usage_count} conversations</p>
-                                        </div>
-                                        <div class="flex flex-col space-y-2">
                                             <button onclick="editCompanion('${companion.id}')" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">Edit</button>
                                             <button onclick="deleteCompanion('${companion.id}')" class="bg-red-500 text-white px-4 py-2 rounded text-sm">Delete</button>
                                         </div>
