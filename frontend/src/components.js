@@ -1686,5 +1686,692 @@ export {
   MoodTracker,
   AICompanionSelector,
   AICompanionCreator,
-  AICompanionManager
+  AICompanionManager,
+  PaywallScreen,
+  SubscriptionScreen,
+  VoiceChatInterface,
+  CreditsStore
+};
+
+// Paywall Screen Component - Tinder-style upgrade prompts
+const PaywallScreen = ({ subscription, onUpgrade, onBack }) => {
+  const features = [
+    {
+      icon: FaInfinity,
+      title: 'Unlimited Messages',
+      description: 'Chat with AI companions without limits',
+      tier: 'premium'
+    },
+    {
+      icon: FaHeadphones,
+      title: 'Voice Chat',
+      description: 'Talk to your AI companions with realistic voices',
+      tier: 'premium'
+    },
+    {
+      icon: FaCrown,
+      title: 'Premium AI Companions',
+      description: 'Access exclusive AI personalities',
+      tier: 'premium'
+    },
+    {
+      icon: FaDiamond,
+      title: 'Unlimited Swipes',
+      description: 'Never run out of potential matches',
+      tier: 'platinum'
+    }
+  ];
+
+  const handleUpgrade = (tier) => {
+    const newSubscription = {
+      tier,
+      credits: tier === 'free' ? 10 : 999,
+      voiceMinutes: tier === 'premium' ? 100 : tier === 'platinum' ? 500 : 0,
+      unlimitedMessages: tier !== 'free',
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+    };
+    onUpgrade(newSubscription);
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-white">Upgrade to Premium</h2>
+          <p className="text-gray-400">Unlock the full Soulmate experience</p>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {/* Current Plan */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-xl font-semibold text-white capitalize">{subscription.tier} Plan</h3>
+              <p className="text-gray-400">
+                {subscription.tier === 'free' 
+                  ? `${subscription.credits} credits remaining`
+                  : 'Unlimited access'
+                }
+              </p>
+            </div>
+            {subscription.tier !== 'free' && (
+              <div className="flex items-center space-x-2">
+                <FaCrown className="text-yellow-500" />
+                <span className="text-yellow-500 font-semibold">Active</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Features Grid */}
+        <div className="grid gap-4 mb-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`bg-white/10 backdrop-blur-md rounded-3xl p-6 ${
+                subscription.tier === 'free' ? 'opacity-60' : ''
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <feature.icon className="text-white text-xl" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold text-white">{feature.title}</h4>
+                  <p className="text-gray-400 text-sm">{feature.description}</p>
+                </div>
+                {subscription.tier === 'free' && (
+                  <FaLock className="text-gray-500" />
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Upgrade Options */}
+        {subscription.tier === 'free' && (
+          <div className="space-y-4">
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              onClick={() => handleUpgrade('premium')}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 rounded-3xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center space-x-3">
+                <FaCrown className="text-2xl" />
+                <div>
+                  <h3 className="text-xl font-semibold">Premium - $9.99/month</h3>
+                  <p className="text-sm opacity-90">Voice chat + unlimited messages</p>
+                </div>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              onClick={() => handleUpgrade('platinum')}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-3xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              <div className="flex items-center justify-center space-x-3">
+                <FaDiamond className="text-2xl" />
+                <div>
+                  <h3 className="text-xl font-semibold">Platinum - $19.99/month</h3>
+                  <p className="text-sm opacity-90">Everything + unlimited swipes</p>
+                </div>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              onClick={() => onBack()}
+              className="w-full bg-white/20 backdrop-blur-sm text-white py-4 px-8 rounded-full font-semibold hover:bg-white/30 transition-all duration-200"
+            >
+              Maybe Later
+            </motion.button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Voice Chat Interface Component - HeyGem-style real-time conversation
+const VoiceChatInterface = ({ aiCompanion, user, subscription, onBack, onUpgradeRequired, onUseVoiceMinute }) => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioChat, setAudioChat] = useState(null);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: `Hi ${user?.name}! I'm excited to talk with you using my voice. Hold the microphone button to speak!`,
+      sender: 'ai',
+      timestamp: new Date(),
+      isVoice: true
+    }
+  ]);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+
+  useEffect(() => {
+    if (subscription.voiceMinutes <= 0) {
+      onUpgradeRequired();
+      return;
+    }
+
+    const initAudioChat = async () => {
+      try {
+        setConnectionStatus('connecting');
+        const chat = new RealtimeAudioChat(
+          aiCompanion,
+          (message) => {
+            setMessages(prev => [...prev, message]);
+            if (message.type === 'ai_voice_response') {
+              setIsSpeaking(true);
+              setTimeout(() => setIsSpeaking(false), 3000);
+            }
+          },
+          (error) => {
+            console.error('Voice chat error:', error);
+            setConnectionStatus('error');
+          }
+        );
+
+        const success = await chat.init();
+        if (success) {
+          setAudioChat(chat);
+          setIsConnected(true);
+          setConnectionStatus('connected');
+        }
+      } catch (error) {
+        setConnectionStatus('error');
+      }
+    };
+
+    initAudioChat();
+
+    return () => {
+      if (audioChat) {
+        audioChat.disconnect();
+      }
+    };
+  }, []);
+
+  const startRecording = async () => {
+    if (!audioChat || subscription.voiceMinutes <= 0) {
+      onUpgradeRequired();
+      return;
+    }
+
+    const success = await audioChat.startRecording();
+    if (success) {
+      setIsRecording(true);
+      onUseVoiceMinute();
+    }
+  };
+
+  const stopRecording = () => {
+    if (audioChat && isRecording) {
+      audioChat.stopRecording();
+      setIsRecording(false);
+    }
+  };
+
+  const sendTextMessage = (text) => {
+    if (audioChat) {
+      const message = {
+        id: Date.now(),
+        text,
+        sender: 'user',
+        timestamp: new Date(),
+        isVoice: false
+      };
+      setMessages(prev => [...prev, message]);
+      audioChat.sendTextMessage(text);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4">
+        <div className="flex items-center space-x-4 mb-4">
+          <button onClick={onBack} className="text-white">
+            <FaArrowLeft className="text-xl" />
+          </button>
+          <img
+            src={aiCompanion?.avatar}
+            alt={aiCompanion?.name}
+            className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+          />
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <h3 className="text-white font-semibold">{aiCompanion?.name}</h3>
+              <span className="text-lg">{aiCompanion?.emoji}</span>
+              <FaHeadphones className="text-purple-400" />
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500' : 
+                connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'
+              }`}></div>
+              <p className="text-gray-400 text-sm">
+                {connectionStatus === 'connected' ? 'Voice connected' : 
+                 connectionStatus === 'connecting' ? 'Connecting...' : 'Connection failed'}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-white text-sm font-medium">{subscription.voiceMinutes} min</p>
+            <p className="text-gray-400 text-xs">remaining</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Voice Visualization */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <motion.div
+          animate={{ 
+            scale: isSpeaking ? [1, 1.1, 1] : isRecording ? [1, 1.2, 1] : 1,
+            borderColor: isSpeaking ? '#8B5CF6' : isRecording ? '#EF4444' : '#6B7280'
+          }}
+          transition={{ duration: 0.5, repeat: isSpeaking || isRecording ? Infinity : 0 }}
+          className="w-48 h-48 rounded-full border-4 flex items-center justify-center mb-8 bg-white/10 backdrop-blur-md"
+        >
+          <img
+            src={aiCompanion?.avatar}
+            alt={aiCompanion?.name}
+            className="w-32 h-32 rounded-full object-cover"
+          />
+        </motion.div>
+
+        {/* Status Display */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          {isSpeaking && (
+            <div className="flex items-center justify-center space-x-2 text-purple-400">
+              <FaVolumeUp className="text-xl" />
+              <p className="text-lg font-medium">{aiCompanion?.name} is speaking...</p>
+            </div>
+          )}
+          {isRecording && (
+            <div className="flex items-center justify-center space-x-2 text-red-400">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <FaMicrophone className="text-xl" />
+              </motion.div>
+              <p className="text-lg font-medium">Listening...</p>
+            </div>
+          )}
+          {!isSpeaking && !isRecording && (
+            <p className="text-gray-400">Hold the mic button to start talking</p>
+          )}
+        </motion.div>
+
+        {/* Voice Controls */}
+        <div className="flex items-center space-x-8">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
+            disabled={!isConnected || subscription.voiceMinutes <= 0}
+            className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl transition-all duration-200 ${
+              isRecording 
+                ? 'bg-red-500 shadow-lg scale-110' 
+                : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
+            } disabled:opacity-50`}
+          >
+            {isRecording ? <FaMicrophoneSlash /> : <FaMicrophone />}
+          </motion.button>
+        </div>
+
+        {/* Quick Text Options */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {['How are you?', 'Tell me about yourself', 'What\'s your favorite thing?', 'I love talking with you'].map((text) => (
+            <button
+              key={text}
+              onClick={() => sendTextMessage(text)}
+              className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Messages */}
+      <div className="bg-white/10 backdrop-blur-md p-4 max-h-48 overflow-y-auto">
+        <h4 className="text-white font-medium mb-3">Recent Messages</h4>
+        <div className="space-y-2">
+          {messages.slice(-3).map((message) => (
+            <div key={message.id} className="flex items-start space-x-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                message.sender === 'ai' ? 'bg-purple-500' : 'bg-pink-500'
+              }`}>
+                {message.sender === 'ai' ? aiCompanion?.emoji : '👤'}
+              </div>
+              <div className="flex-1">
+                <p className="text-white text-sm">{message.text}</p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <p className="text-gray-400 text-xs">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  {message.isVoice && (
+                    <FaHeadphones className="text-purple-400 text-xs" />
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Credits Store Component
+const CreditsStore = ({ subscription, onPurchase, onBack }) => {
+  const creditPackages = [
+    {
+      credits: 10,
+      price: '$0.99',
+      popular: false,
+      bonus: null
+    },
+    {
+      credits: 50,
+      price: '$3.99',
+      popular: true,
+      bonus: '25% bonus'
+    },
+    {
+      credits: 100,
+      price: '$6.99',
+      popular: false,
+      bonus: '50% bonus'
+    },
+    {
+      credits: 200,
+      price: '$9.99',
+      popular: false,
+      bonus: '100% bonus'
+    }
+  ];
+
+  const handlePurchase = (packageData) => {
+    const updatedSubscription = {
+      ...subscription,
+      credits: subscription.credits + packageData.credits
+    };
+    onPurchase(updatedSubscription);
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-white">Buy Credits</h2>
+          <p className="text-gray-400">Get more credits to chat with AI companions</p>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {/* Current Credits */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-white">Current Credits</h3>
+              <p className="text-gray-400">Use credits to send messages</p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-white">{subscription.credits}</p>
+              <p className="text-gray-400 text-sm">credits</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Credit Packages */}
+        <div className="grid grid-cols-1 gap-4">
+          {creditPackages.map((pkg, index) => (
+            <motion.button
+              key={pkg.credits}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onClick={() => handlePurchase(pkg)}
+              className={`bg-white/10 backdrop-blur-md rounded-3xl p-6 hover:bg-white/20 transition-all duration-200 relative ${
+                pkg.popular ? 'ring-2 ring-yellow-500' : ''
+              }`}
+            >
+              {pkg.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+                    POPULAR
+                  </span>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <h4 className="text-xl font-semibold text-white">{pkg.credits} Credits</h4>
+                  {pkg.bonus && (
+                    <p className="text-green-400 text-sm">{pkg.bonus}</p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-white">{pkg.price}</p>
+                  <p className="text-gray-400 text-sm">one-time</p>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-6 bg-white/10 backdrop-blur-md rounded-3xl p-6"
+        >
+          <h4 className="text-white font-semibold mb-3">How Credits Work</h4>
+          <div className="space-y-2 text-gray-300 text-sm">
+            <p>• 1 credit = 1 message to AI companions</p>
+            <p>• Credits never expire</p>
+            <p>• Premium members get unlimited messages</p>
+            <p>• Secure payment via Stripe</p>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Subscription Screen Component
+const SubscriptionScreen = ({ subscription, onSubscribe, onBack }) => {
+  const plans = [
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: '$9.99',
+      period: 'month',
+      features: [
+        'Unlimited AI messages',
+        '100 voice chat minutes',
+        'Premium AI companions',
+        'Advanced personality traits',
+        'Priority support'
+      ],
+      gradient: 'from-pink-500 to-purple-600',
+      popular: true
+    },
+    {
+      id: 'platinum',
+      name: 'Platinum',
+      price: '$19.99',
+      period: 'month',
+      features: [
+        'Everything in Premium',
+        '500 voice chat minutes',
+        'Unlimited swipes',
+        'Exclusive AI companions',
+        'Custom AI training',
+        'Early access features'
+      ],
+      gradient: 'from-yellow-500 to-orange-500',
+      popular: false
+    }
+  ];
+
+  const handleSubscribe = (plan) => {
+    const newSubscription = {
+      tier: plan.id,
+      credits: 999,
+      voiceMinutes: plan.id === 'premium' ? 100 : 500,
+      unlimitedMessages: true,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    };
+    onSubscribe(newSubscription);
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md p-4 flex items-center space-x-4">
+        <button onClick={onBack} className="text-white">
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
+          <p className="text-gray-400">Unlock premium features and AI companions</p>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {/* Plans */}
+        <div className="space-y-6">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`bg-white/10 backdrop-blur-md rounded-3xl p-6 relative ${
+                plan.popular ? 'ring-2 ring-yellow-500' : ''
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-yellow-500 text-black px-4 py-1 rounded-full text-sm font-bold">
+                    MOST POPULAR
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
+                  <div className="flex items-baseline space-x-1">
+                    <span className="text-3xl font-bold text-white">{plan.price}</span>
+                    <span className="text-gray-400">/{plan.period}</span>
+                  </div>
+                </div>
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${plan.gradient} flex items-center justify-center`}>
+                  <FaCrown className="text-white text-xl" />
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {plan.features.map((feature, featureIndex) => (
+                  <div key={featureIndex} className="flex items-center space-x-3">
+                    <FaCheck className="text-green-400 text-sm" />
+                    <span className="text-gray-300">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => handleSubscribe(plan)}
+                className={`w-full bg-gradient-to-r ${plan.gradient} text-white py-4 px-8 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200`}
+              >
+                {subscription.tier === plan.id ? 'Current Plan' : `Subscribe to ${plan.name}`}
+              </button>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Free Plan */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 bg-white/10 backdrop-blur-md rounded-3xl p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white">Free Plan</h3>
+              <p className="text-gray-400">Limited features</p>
+            </div>
+            <p className="text-2xl font-bold text-white">$0</p>
+          </div>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center space-x-3">
+              <FaCheck className="text-green-400 text-sm" />
+              <span className="text-gray-300">10 messages per day</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <FaTimes className="text-red-400 text-sm" />
+              <span className="text-gray-300">No voice chat</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <FaTimes className="text-red-400 text-sm" />
+              <span className="text-gray-300">Basic AI companions only</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-gray-400 text-sm">
+            Cancel anytime • Secure payment via Stripe • 7-day free trial
+          </p>
+        </motion.div>
+      </div>
+    </div>
+  );
 };
