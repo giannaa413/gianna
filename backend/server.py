@@ -683,10 +683,6 @@ async def admin_dashboard():
                         `;
                         break;
                                             </div>
-                                            <p class="text-gray-300">${companion.description}</p>
-                                            <div class="flex gap-2 mt-2">
-                                                ${companion.traits.map(trait => `<span class="bg-white/20 text-white px-2 py-1 rounded-full text-xs">${trait}</span>`).join('')}
-                                            </div>
                                             <p class="text-sm text-gray-400 mt-2">Usage: ${companion.usage_count} conversations</p>
                                         </div>
                                         <div class="flex flex-col space-y-2">
