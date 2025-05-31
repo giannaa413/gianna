@@ -638,13 +638,11 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
   );
 };
 
-// Export all components
-const Components = {
+// Export all components individually
+export {
   WelcomeScreen,
   ProfileSetup,
   ProfileDiscovery,
   MatchScreen,
   ChatInterface
 };
-
-export default Components;
