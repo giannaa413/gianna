@@ -356,6 +356,19 @@ export const ProfileDiscovery = ({ user, profiles, currentIndex, onSwipe, onProf
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
 
+  // Early return if no current profile
+  if (!currentProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-6">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-white mb-4">You're all caught up!</h2>
+          <p className="text-gray-300">Check back later for more profiles</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleDragEnd = (event, info) => {
     const offset = info.offset.x;
     const velocity = info.velocity.x;
