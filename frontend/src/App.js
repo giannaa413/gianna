@@ -8,7 +8,18 @@ import {
   ChatInterface, 
   ProfileSetup,
   UserProfile,
-  SettingsScreen
+  SettingsScreen,
+  MainDashboard,
+  AICompanionChat,
+  DiaryInterface,
+  MoodTracker,
+  AICompanionSelector,
+  AICompanionCreator,
+  AICompanionManager,
+  PaywallScreen,
+  SubscriptionScreen,
+  VoiceChatInterface,
+  CreditsStore
 } from './components';
 
 // Mock data for dating profiles
@@ -98,6 +109,56 @@ function App() {
   const [currentMatch, setCurrentMatch] = useState(null);
   const [likedProfiles, setLikedProfiles] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  
+  // Enhanced subscription system from GitHub code
+  const [subscription, setSubscription] = useState({
+    tier: 'free', // free, premium, platinum
+    credits: 10,
+    voiceMinutes: 0,
+    unlimitedMessages: false,
+    expiresAt: null
+  });
+  
+  // AI Companions system from GitHub code
+  const [aiCompanions, setAiCompanions] = useState([
+    {
+      id: 1,
+      name: 'Luna',
+      personality: 'caring',
+      avatar: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e',
+      emoji: '🌙',
+      description: 'A caring and empathetic companion who loves deep conversations',
+      traits: ['Empathetic', 'Wise', 'Supportive'],
+      voiceEnabled: false,
+      isPremium: false,
+      isActive: true
+    },
+    {
+      id: 2,
+      name: 'Alex',
+      personality: 'creative',
+      avatar: 'https://images.pexels.com/photos/8566540/pexels-photo-8566540.jpeg',
+      emoji: '🎨',
+      description: 'An artistic soul who inspires creativity and imagination',
+      traits: ['Creative', 'Inspiring', 'Artistic'],
+      voiceEnabled: true,
+      isPremium: true,
+      isActive: false
+    },
+    {
+      id: 3,
+      name: 'Nova',
+      personality: 'energetic',
+      avatar: 'https://images.unsplash.com/photo-1643255083197-18721220670e',
+      emoji: '⚡',
+      description: 'An energetic companion who loves adventures and new experiences',
+      traits: ['Energetic', 'Adventurous', 'Optimistic'],
+      voiceEnabled: true,
+      isPremium: true,
+      isActive: false
+    }
+  ]);
+  const [activeCompanion, setActiveCompanion] = useState(aiCompanions[0]);
 
   // Listen for force match demo events
   useEffect(() => {
@@ -112,14 +173,45 @@ function App() {
     return () => window.removeEventListener('forceMatch', handleForceMatch);
   }, []);
 
+  // Check if user can perform action based on subscription
+  const canPerformAction = (actionType) => {
+    switch (actionType) {
+      case 'message':
+        return subscription.tier !== 'free' || subscription.credits > 0;
+      case 'voice_chat':
+        return subscription.tier !== 'free' && subscription.voiceMinutes > 0;
+      case 'unlimited_swipes':
+        return subscription.tier === 'platinum';
+      case 'premium_companions':
+        return subscription.tier !== 'free';
+      default:
+        return true;
+    }
+  };
+
+  const useCredit = () => {
+    if (subscription.tier === 'free' && subscription.credits > 0) {
+      setSubscription(prev => ({ ...prev, credits: prev.credits - 1 }));
+      return true;
+    }
+    return subscription.tier !== 'free';
+  };
+
   const handleSwipe = (profileId, direction) => {
     const profile = profiles.find(p => p.id === profileId);
     
     if (direction === 'right') {
       setLikedProfiles(prev => [...prev, profileId]);
       
-      // Simulate match (30% chance)
-      if (Math.random() > 0.7) {
+      // Check subscription limits
+      if (subscription.tier === 'free' && likedProfiles.length >= 5) {
+        setCurrentScreen('paywall');
+        return;
+      }
+      
+      // Simulate match (30% chance for premium, 15% for free)
+      const matchChance = subscription.tier !== 'free' ? 0.7 : 0.85;
+      if (Math.random() > matchChance) {
         const newMatch = {
           id: Date.now(),
           profile: profile,
@@ -153,8 +245,109 @@ function App() {
       <ProfileSetup 
         onComplete={(userData) => {
           setUser(userData);
-          setCurrentScreen('discovery');
+          setCurrentScreen('aiSelector');
         }} 
+      />
+    ),
+    paywall: (
+      <PaywallScreen 
+        subscription={subscription}
+        onUpgrade={(newSub) => {
+          setSubscription(newSub);
+          setCurrentScreen('dashboard');
+        }}
+        onBack={() => setCurrentScreen('dashboard')}
+      />
+    ),
+    subscription: (
+      <SubscriptionScreen
+        subscription={subscription}
+        onSubscribe={(newSub) => {
+          setSubscription(newSub);
+          setCurrentScreen('dashboard');
+        }}
+        onBack={() => setCurrentScreen('dashboard')}
+      />
+    ),
+    credits: (
+      <CreditsStore
+        subscription={subscription}
+        onPurchase={(updatedSub) => {
+          setSubscription(updatedSub);
+          setCurrentScreen('dashboard');
+        }}
+        onBack={() => setCurrentScreen('dashboard')}
+      />
+    ),
+    aiSelector: (
+      <AICompanionSelector 
+        companions={aiCompanions}
+        subscription={subscription}
+        onSelectCompanion={(companion) => {
+          if (companion.isPremium && !canPerformAction('premium_companions')) {
+            setCurrentScreen('paywall');
+            return;
+          }
+          setActiveCompanion(companion);
+          setAiCompanions(prev => prev.map(c => ({
+            ...c,
+            isActive: c.id === companion.id
+          })));
+          setCurrentScreen('dashboard');
+        }}
+        onCreateNew={() => setCurrentScreen('aiCreator')}
+      />
+    ),
+    aiCreator: (
+      <AICompanionCreator
+        subscription={subscription}
+        onComplete={(newCompanion) => {
+          if (newCompanion.isPremium && !canPerformAction('premium_companions')) {
+            setCurrentScreen('paywall');
+            return;
+          }
+          const companionWithId = { ...newCompanion, id: Date.now(), isActive: true };
+          setAiCompanions(prev => [...prev.map(c => ({ ...c, isActive: false })), companionWithId]);
+          setActiveCompanion(companionWithId);
+          setCurrentScreen('dashboard');
+        }}
+        onBack={() => setCurrentScreen('aiSelector')}
+      />
+    ),
+    dashboard: (
+      <MainDashboard 
+        user={user}
+        aiCompanion={activeCompanion}
+        subscription={subscription}
+        onNavigate={setCurrentScreen}
+        matches={matches}
+      />
+    ),
+    aiManager: (
+      <AICompanionManager
+        companions={aiCompanions}
+        activeCompanion={activeCompanion}
+        subscription={subscription}
+        onSelectCompanion={(companion) => {
+          if (companion.isPremium && !canPerformAction('premium_companions')) {
+            setCurrentScreen('paywall');
+            return;
+          }
+          setActiveCompanion(companion);
+          setAiCompanions(prev => prev.map(c => ({
+            ...c,
+            isActive: c.id === companion.id
+          })));
+        }}
+        onCreateNew={() => setCurrentScreen('aiCreator')}
+        onBack={() => setCurrentScreen('dashboard')}
+        onDeleteCompanion={(companionId) => {
+          setAiCompanions(prev => prev.filter(c => c.id !== companionId));
+          if (activeCompanion.id === companionId) {
+            const remaining = aiCompanions.filter(c => c.id !== companionId);
+            setActiveCompanion(remaining[0] || null);
+          }
+        }}
       />
     ),
     discovery: (
@@ -162,10 +355,12 @@ function App() {
         user={user}
         profiles={profiles}
         currentIndex={currentProfileIndex}
+        subscription={subscription}
         onSwipe={handleSwipe}
         onProfile={() => setCurrentScreen('profile')}
         onMatches={() => setCurrentScreen('matches')}
         onSettings={() => setCurrentScreen('settings')}
+        onUpgradeRequired={() => setCurrentScreen('paywall')}
       />
     ),
     match: (
@@ -179,8 +374,49 @@ function App() {
       <ChatInterface 
         matches={matches}
         currentMatch={currentMatch}
-        onBack={() => setCurrentScreen('discovery')}
+        subscription={subscription}
+        onBack={() => setCurrentScreen('dashboard')}
         onSelectMatch={(match) => setCurrentMatch(match)}
+        onUpgradeRequired={() => setCurrentScreen('paywall')}
+        useCredit={useCredit}
+      />
+    ),
+    aiChat: (
+      <AICompanionChat
+        aiCompanion={activeCompanion}
+        user={user}
+        subscription={subscription}
+        onBack={() => setCurrentScreen('dashboard')}
+        onVoiceChat={() => setCurrentScreen('voiceChat')}
+        onUpgradeRequired={() => setCurrentScreen('paywall')}
+        useCredit={useCredit}
+      />
+    ),
+    voiceChat: (
+      <VoiceChatInterface
+        aiCompanion={activeCompanion}
+        user={user}
+        subscription={subscription}
+        onBack={() => setCurrentScreen('aiChat')}
+        onUpgradeRequired={() => setCurrentScreen('paywall')}
+        onUseVoiceMinute={() => {
+          setSubscription(prev => ({ 
+            ...prev, 
+            voiceMinutes: Math.max(0, prev.voiceMinutes - 1) 
+          }));
+        }}
+      />
+    ),
+    diary: (
+      <DiaryInterface
+        user={user}
+        onBack={() => setCurrentScreen('dashboard')}
+      />
+    ),
+    mood: (
+      <MoodTracker
+        user={user}
+        onBack={() => setCurrentScreen('dashboard')}
       />
     ),
     matches: (
@@ -188,7 +424,7 @@ function App() {
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6 pt-12">
             <button 
-              onClick={() => setCurrentScreen('discovery')}
+              onClick={() => setCurrentScreen('dashboard')}
               className="p-2 rounded-full bg-white/10 backdrop-blur-md"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,14 +482,16 @@ function App() {
     profile: (
       <UserProfile 
         user={user}
-        onBack={() => setCurrentScreen('discovery')}
+        onBack={() => setCurrentScreen('dashboard')}
         onEdit={() => setCurrentScreen('setup')}
       />
     ),
     settings: (
       <SettingsScreen 
         user={user}
-        onBack={() => setCurrentScreen('discovery')}
+        subscription={subscription}
+        onBack={() => setCurrentScreen('dashboard')}
+        onNavigate={setCurrentScreen}
         onLogout={() => {
           setUser(null);
           setCurrentScreen('welcome');
