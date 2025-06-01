@@ -99,6 +99,19 @@ function App() {
   const [likedProfiles, setLikedProfiles] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
 
+  // Listen for force match demo events
+  useEffect(() => {
+    const handleForceMatch = (event) => {
+      const newMatch = event.detail;
+      setMatches(prev => [...prev, newMatch]);
+      setCurrentMatch(newMatch);
+      setCurrentScreen('match');
+    };
+
+    window.addEventListener('forceMatch', handleForceMatch);
+    return () => window.removeEventListener('forceMatch', handleForceMatch);
+  }, []);
+
   const handleSwipe = (profileId, direction) => {
     const profile = profiles.find(p => p.id === profileId);
     
