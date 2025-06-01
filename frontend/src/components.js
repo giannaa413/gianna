@@ -556,6 +556,29 @@ export const ProfileDiscovery = ({ user, profiles, currentIndex, onSwipe, onProf
           </svg>
         </motion.button>
       </div>
+
+      {/* Demo helper - Force match button */}
+      <motion.button
+        onClick={() => {
+          const profile = profiles.find(p => p.id === currentProfile.id);
+          const newMatch = {
+            id: Date.now(),
+            profile: profile,
+            matchedAt: new Date(),
+            lastMessage: null,
+            unread: false
+          };
+          // Trigger match immediately for demo
+          setTimeout(() => {
+            const event = new CustomEvent('forceMatch', { detail: newMatch });
+            window.dispatchEvent(event);
+          }, 500);
+        }}
+        className="absolute top-20 right-4 px-3 py-1 bg-yellow-500/20 backdrop-blur-md text-yellow-300 text-xs rounded-full border border-yellow-500/30"
+        whileHover={{ scale: 1.05 }}
+      >
+        Force Match (Demo)
+      </motion.button>
     </div>
   );
 };
