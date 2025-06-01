@@ -272,13 +272,14 @@ export const ProfileSetup = ({ onComplete }) => {
                 value={formData.lookingFor}
                 onChange={(e) => setFormData(prev => ({ ...prev, lookingFor: e.target.value }))}
                 className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                style={{ color: 'white' }}
               >
-                <option value="">Select relationship type</option>
-                <option value="serious">Serious relationship</option>
-                <option value="casual">Casual dating</option>
-                <option value="friendship">New friends</option>
-                <option value="something_casual">Something casual</option>
-                <option value="not_sure">Not sure yet</option>
+                <option value="" style={{ color: 'black' }}>Select relationship type</option>
+                <option value="serious" style={{ color: 'black' }}>Serious relationship</option>
+                <option value="casual" style={{ color: 'black' }}>Casual dating</option>
+                <option value="friendship" style={{ color: 'black' }}>New friends</option>
+                <option value="something_casual" style={{ color: 'black' }}>Something casual</option>
+                <option value="not_sure" style={{ color: 'black' }}>Not sure yet</option>
               </select>
             </div>
           </div>
