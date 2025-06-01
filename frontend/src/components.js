@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { 
+  FaHeart, FaTimes, FaStar, FaArrowLeft, FaPaperPlane, FaCamera, FaEdit,
+  FaUser, FaComments, FaBookOpen, FaSmile, FaBrain, FaRocket, FaMoon,
+  FaSun, FaMusic, FaGamepad, FaGift, FaCoffee, FaTree, FaPlus, FaSave,
+  FaCog, FaTrash, FaCheck, FaRandom, FaPalette, FaUserPlus, FaCrown,
+  FaMicrophone, FaMicrophoneSlash, FaPlay, FaPause, FaCreditCard,
+  FaGem, FaInfinity, FaLock, FaUnlock, FaVolumeUp, FaHeadphones
+} from 'react-icons/fa';
+import RealtimeAudioChat from './realtimeChat';
 
 // Welcome Screen Component
 export const WelcomeScreen = ({ onGetStarted }) => {
