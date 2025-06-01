@@ -7,19 +7,13 @@ import {
   MatchScreen, 
   ChatInterface, 
   ProfileSetup,
-  UserProfile,
-  SettingsScreen,
   MainDashboard,
   AICompanionChat,
   DiaryInterface,
   MoodTracker,
   AICompanionSelector,
   AICompanionCreator,
-  AICompanionManager,
-  PaywallScreen,
-  SubscriptionScreen,
-  VoiceChatInterface,
-  CreditsStore
+  AICompanionManager
 } from './components';
 
 // Mock data for dating profiles
