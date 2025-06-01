@@ -154,58 +154,14 @@ function App() {
   ]);
   const [activeCompanion, setActiveCompanion] = useState(aiCompanions[0]);
 
-  // Listen for force match demo events
-  useEffect(() => {
-    const handleForceMatch = (event) => {
-      const newMatch = event.detail;
-      setMatches(prev => [...prev, newMatch]);
-      setCurrentMatch(newMatch);
-      setCurrentScreen('match');
-    };
-
-    window.addEventListener('forceMatch', handleForceMatch);
-    return () => window.removeEventListener('forceMatch', handleForceMatch);
-  }, []);
-
-  // Check if user can perform action based on subscription
-  const canPerformAction = (actionType) => {
-    switch (actionType) {
-      case 'message':
-        return subscription.tier !== 'free' || subscription.credits > 0;
-      case 'voice_chat':
-        return subscription.tier !== 'free' && subscription.voiceMinutes > 0;
-      case 'unlimited_swipes':
-        return subscription.tier === 'platinum';
-      case 'premium_companions':
-        return subscription.tier !== 'free';
-      default:
-        return true;
-    }
-  };
-
-  const useCredit = () => {
-    if (subscription.tier === 'free' && subscription.credits > 0) {
-      setSubscription(prev => ({ ...prev, credits: prev.credits - 1 }));
-      return true;
-    }
-    return subscription.tier !== 'free';
-  };
-
   const handleSwipe = (profileId, direction) => {
     const profile = profiles.find(p => p.id === profileId);
     
     if (direction === 'right') {
       setLikedProfiles(prev => [...prev, profileId]);
       
-      // Check subscription limits
-      if (subscription.tier === 'free' && likedProfiles.length >= 5) {
-        setCurrentScreen('paywall');
-        return;
-      }
-      
-      // Simulate match (30% chance for premium, 15% for free)
-      const matchChance = subscription.tier !== 'free' ? 0.7 : 0.85;
-      if (Math.random() > matchChance) {
+      // Simulate match (30% chance)
+      if (Math.random() > 0.7) {
         const newMatch = {
           id: Date.now(),
           profile: profile,
@@ -243,45 +199,10 @@ function App() {
         }} 
       />
     ),
-    paywall: (
-      <PaywallScreen 
-        subscription={subscription}
-        onUpgrade={(newSub) => {
-          setSubscription(newSub);
-          setCurrentScreen('dashboard');
-        }}
-        onBack={() => setCurrentScreen('dashboard')}
-      />
-    ),
-    subscription: (
-      <SubscriptionScreen
-        subscription={subscription}
-        onSubscribe={(newSub) => {
-          setSubscription(newSub);
-          setCurrentScreen('dashboard');
-        }}
-        onBack={() => setCurrentScreen('dashboard')}
-      />
-    ),
-    credits: (
-      <CreditsStore
-        subscription={subscription}
-        onPurchase={(updatedSub) => {
-          setSubscription(updatedSub);
-          setCurrentScreen('dashboard');
-        }}
-        onBack={() => setCurrentScreen('dashboard')}
-      />
-    ),
     aiSelector: (
       <AICompanionSelector 
         companions={aiCompanions}
-        subscription={subscription}
         onSelectCompanion={(companion) => {
-          if (companion.isPremium && !canPerformAction('premium_companions')) {
-            setCurrentScreen('paywall');
-            return;
-          }
           setActiveCompanion(companion);
           setAiCompanions(prev => prev.map(c => ({
             ...c,
@@ -294,12 +215,7 @@ function App() {
     ),
     aiCreator: (
       <AICompanionCreator
-        subscription={subscription}
         onComplete={(newCompanion) => {
-          if (newCompanion.isPremium && !canPerformAction('premium_companions')) {
-            setCurrentScreen('paywall');
-            return;
-          }
           const companionWithId = { ...newCompanion, id: Date.now(), isActive: true };
           setAiCompanions(prev => [...prev.map(c => ({ ...c, isActive: false })), companionWithId]);
           setActiveCompanion(companionWithId);
@@ -321,12 +237,7 @@ function App() {
       <AICompanionManager
         companions={aiCompanions}
         activeCompanion={activeCompanion}
-        subscription={subscription}
         onSelectCompanion={(companion) => {
-          if (companion.isPremium && !canPerformAction('premium_companions')) {
-            setCurrentScreen('paywall');
-            return;
-          }
           setActiveCompanion(companion);
           setAiCompanions(prev => prev.map(c => ({
             ...c,
@@ -347,14 +258,8 @@ function App() {
     discovery: (
       <ProfileDiscovery 
         user={user}
-        profiles={profiles}
-        currentIndex={currentProfileIndex}
-        subscription={subscription}
-        onSwipe={handleSwipe}
-        onProfile={() => setCurrentScreen('profile')}
-        onMatches={() => setCurrentScreen('matches')}
-        onSettings={() => setCurrentScreen('settings')}
-        onUpgradeRequired={() => setCurrentScreen('paywall')}
+        onMatch={handleStartChat}
+        onBack={() => setCurrentScreen('dashboard')}
       />
     ),
     match: (
@@ -368,37 +273,15 @@ function App() {
       <ChatInterface 
         matches={matches}
         currentMatch={currentMatch}
-        subscription={subscription}
         onBack={() => setCurrentScreen('dashboard')}
         onSelectMatch={(match) => setCurrentMatch(match)}
-        onUpgradeRequired={() => setCurrentScreen('paywall')}
-        useCredit={useCredit}
       />
     ),
     aiChat: (
       <AICompanionChat
         aiCompanion={activeCompanion}
         user={user}
-        subscription={subscription}
         onBack={() => setCurrentScreen('dashboard')}
-        onVoiceChat={() => setCurrentScreen('voiceChat')}
-        onUpgradeRequired={() => setCurrentScreen('paywall')}
-        useCredit={useCredit}
-      />
-    ),
-    voiceChat: (
-      <VoiceChatInterface
-        aiCompanion={activeCompanion}
-        user={user}
-        subscription={subscription}
-        onBack={() => setCurrentScreen('aiChat')}
-        onUpgradeRequired={() => setCurrentScreen('paywall')}
-        onUseVoiceMinute={() => {
-          setSubscription(prev => ({ 
-            ...prev, 
-            voiceMinutes: Math.max(0, prev.voiceMinutes - 1) 
-          }));
-        }}
       />
     ),
     diary: (
@@ -411,85 +294,6 @@ function App() {
       <MoodTracker
         user={user}
         onBack={() => setCurrentScreen('dashboard')}
-      />
-    ),
-    matches: (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-between mb-6 pt-12">
-            <button 
-              onClick={() => setCurrentScreen('dashboard')}
-              className="p-2 rounded-full bg-white/10 backdrop-blur-md"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <h1 className="text-2xl font-bold text-white">Matches</h1>
-            <div className="w-10"></div>
-          </div>
-          
-          <div className="space-y-4">
-            {matches.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">💫</div>
-                <h3 className="text-xl font-semibold text-white mb-2">No matches yet</h3>
-                <p className="text-gray-300">Keep swiping to find your perfect connection!</p>
-              </div>
-            ) : (
-              matches.map((match) => (
-                <motion.div
-                  key={match.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white/10 backdrop-blur-md rounded-2xl p-4 cursor-pointer"
-                  onClick={() => handleStartChat(match)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={match.profile.photos[0]}
-                      alt={match.profile.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white">{match.profile.name}</h3>
-                      <p className="text-gray-300 text-sm">
-                        {match.lastMessage ? match.lastMessage : "Start your conversation"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-gray-400">
-                        {new Date(match.matchedAt).toLocaleDateString()}
-                      </div>
-                      {match.unread && (
-                        <div className="w-3 h-3 bg-purple-500 rounded-full mt-1"></div>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    ),
-    profile: (
-      <UserProfile 
-        user={user}
-        onBack={() => setCurrentScreen('dashboard')}
-        onEdit={() => setCurrentScreen('setup')}
-      />
-    ),
-    settings: (
-      <SettingsScreen 
-        user={user}
-        subscription={subscription}
-        onBack={() => setCurrentScreen('dashboard')}
-        onNavigate={setCurrentScreen}
-        onLogout={() => {
-          setUser(null);
-          setCurrentScreen('welcome');
-        }}
       />
     )
   };
