@@ -1675,6 +1675,7 @@ const ChatInterface = ({ matches, currentMatch, onBack, onSelectMatch }) => {
 
 // Export all components individually
 // Export all components individually
+// Export all components individually
 export {
   WelcomeScreen,
   ProfileSetup,
@@ -1688,8 +1689,10 @@ export {
   AICompanionSelector,
   AICompanionCreator,
   AICompanionManager,
-  UserProfile,
-  SettingsScreen
+  PaywallScreen,
+  SubscriptionScreen,
+  VoiceChatInterface,
+  CreditsStore
 };
 
 // Paywall Screen Component - Tinder-style upgrade prompts
