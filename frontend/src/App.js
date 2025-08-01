@@ -216,8 +216,28 @@ const MessagingApp = () => {
     exitSelectionMode();
   };
 
-  const currentMessage = messages[currentMessageIndex];
-  const currentSender = currentMessage ? getUserById(currentMessage.sender_id) : null;
+  // Get message type icons dynamically
+  const getMessageTypeIcons = (message) => {
+    const icons = [];
+    
+    if (message.message_type === 'voice' || message.voice_base64) {
+      icons.push({ type: 'voice', icon: '🎤', color: 'text-purple-500' });
+    }
+    if (message.message_type === 'image' || message.image_base64) {
+      icons.push({ type: 'image', icon: '📷', color: 'text-green-500' });
+    }
+    if (message.message_type === 'location' || message.location_data) {
+      icons.push({ type: 'location', icon: '📍', color: 'text-red-500' });
+    }
+    if (message.message_type === 'video' || message.video_base64) {
+      icons.push({ type: 'video', icon: '🎥', color: 'text-blue-500' });
+    }
+    if (message.message_type === 'red_packet' || message.red_packet_data) {
+      icons.push({ type: 'red_packet', icon: '🧧', color: 'text-red-600' });
+    }
+    
+    return icons;
+  };
 
   if (!isRegistered) {
     return (
