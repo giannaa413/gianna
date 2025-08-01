@@ -239,43 +239,153 @@ const MessagingApp = () => {
 
   if (!isRegistered) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md border border-white/20">
-          <h1 className="text-3xl font-bold text-white text-center mb-8">🌍 全球智能消息 Global AI Chat</h1>
-          <form onSubmit={handleRegistration} className="space-y-6">
-            <div>
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                手机号 Phone Number
-              </label>
-              <input
-                type="tel"
-                value={registrationData.phone}
-                onChange={(e) => setRegistrationData({...registrationData, phone: e.target.value})}
-                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Enter your phone number"
-                required
-              />
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 overflow-hidden relative">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,69,19,0.3)_0%,transparent_50%)] animate-pulse"></div>
+        </div>
+        
+        {/* Snake Ring Language Selector */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-80 h-80 md:w-96 md:h-96">
+            {/* Language Icons arranged in a circle (Snake-like) */}
+            {languages.slice(0, 20).map((lang, index) => {
+              const angle = (index * 360) / 20;
+              const radius = 140;
+              const x = Math.cos((angle * Math.PI) / 180) * radius;
+              const y = Math.sin((angle * Math.PI) / 180) * radius;
+              
+              return (
+                <div
+                  key={lang.code}
+                  className={`absolute w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-sm transition-all duration-300 cursor-pointer transform hover:scale-110 ${
+                    selectedLanguage === lang.code 
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg shadow-blue-500/50' 
+                      : 'bg-gradient-to-r from-blue-400/30 to-purple-500/30 hover:from-blue-500/50 hover:to-purple-600/50'
+                  }`}
+                  style={{
+                    left: `calc(50% + ${x}px - 24px)`,
+                    top: `calc(50% + ${y}px - 24px)`,
+                    animationDelay: `${index * 0.1}s`
+                  }}
+                  onClick={() => setSelectedLanguage(lang.code)}
+                  title={lang.name}
+                >
+                  {lang.code.toUpperCase()}
+                </div>
+              );
+            })}
+            
+            {/* Central Registration Area */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-xl rounded-3xl p-8 w-72 border border-white/30 shadow-2xl">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🌍</span>
+                  </div>
+                  <h1 className="text-xl font-bold text-white mb-2">全球智能消息</h1>
+                  <p className="text-sm text-white/70">Global AI Chat</p>
+                </div>
+                
+                <form onSubmit={handleRegistration} className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={registrationData.phone}
+                      onChange={(e) => setRegistrationData({...registrationData, phone: e.target.value})}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
+                      placeholder="输入手机号"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={registrationData.phrase}
+                      onChange={(e) => setRegistrationData({...registrationData, phrase: e.target.value})}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
+                      placeholder="AI生成头像和编码昵称"
+                      required
+                    />
+                  </div>
+                  
+                  {/* Auto-play Toggle */}
+                  <div className="flex items-center justify-center space-x-3 py-2">
+                    <span className="text-sm text-white/70">自动播放下一条</span>
+                    <button
+                      type="button"
+                      onClick={() => setAutoRefresh(!autoRefresh)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        autoRefresh ? 'bg-blue-500' : 'bg-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          autoRefresh ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                  >
+                    进入全球聊天室
+                  </button>
+                </form>
+              </div>
             </div>
-            <div>
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                随便说一句话 Say anything
-              </label>
-              <input
-                type="text"
-                value={registrationData.phrase}
-                onChange={(e) => setRegistrationData({...registrationData, phrase: e.target.value})}
-                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="AI will generate your avatar and nickname"
-                required
+          </div>
+        </div>
+        
+        {/* User Info Display (Top Right) */}
+        {currentUser && (
+          <div className="absolute top-6 right-6 bg-gradient-to-r from-white/20 to-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/30">
+            <div className="flex items-center space-x-3">
+              <img
+                src={`data:image/png;base64,${currentUser.avatar_base64}`}
+                alt="Avatar"
+                className="w-12 h-12 rounded-full border-2 border-white/50"
               />
+              <div>
+                <p className="text-white font-semibold">{currentUser.nickname}</p>
+                <p className="text-white/70 text-xs">Code_{currentUser.id.slice(-4)}</p>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
-            >
-              创建账户 Create Account
-            </button>
-          </form>
+          </div>
+        )}
+        
+        {/* Bottom Message Preview */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="bg-gradient-to-r from-white/20 to-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/30 max-w-sm">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                <span className="text-xs text-white">🤖</span>
+              </div>
+              <div>
+                <p className="text-white text-sm">你好，这是一条测试信息</p>
+                <p className="text-white/50 text-xs">Hello, this is a test message</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Floating Particles Animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white/20 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            />
+          ))}
         </div>
       </div>
     );
