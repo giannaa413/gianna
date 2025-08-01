@@ -138,7 +138,7 @@ const MessagingApp = () => {
     if (isSelectionMode) {
       toggleMessageSelection(message.id);
     } else {
-      // Show message details
+      // Show message details - for now just log
       console.log('Viewing message:', message);
     }
   };
@@ -174,10 +174,23 @@ const MessagingApp = () => {
     }
   };
 
-  const handleDragSelect = (message) => {
-    if (isSelectionMode) {
+  const handleDragStart = (message, event) => {
+    setIsDragging(true);
+    if (!isSelectionMode) {
+      setIsSelectionMode(true);
+      setSelectedMessages([message.id]);
+    }
+  };
+
+  const handleDragOver = (message, event) => {
+    event.preventDefault();
+    if (isDragging && isSelectionMode) {
       toggleMessageSelection(message.id);
     }
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
   };
 
   const toggleMessageSelection = (messageId) => {
