@@ -11,8 +11,7 @@ const MessagingApp = () => {
   const [users, setUsers] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [autoPlay, setAutoPlay] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [registrationData, setRegistrationData] = useState({ phone: '', phrase: '' });
   const [isRegistered, setIsRegistered] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -22,7 +21,9 @@ const MessagingApp = () => {
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [showUserDetails, setShowUserDetails] = useState(false);
-  const autoPlayInterval = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const messagesEndRef = useRef(null);
+  const autoRefreshInterval = useRef(null);
 
   // Load languages on component mount
   useEffect(() => {
