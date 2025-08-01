@@ -2,74 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Discord-style global messaging app styles */
 .App {
   text-align: left;
 }
 
-/* Custom styles for the messaging app */
-.message-content {
+/* Message row styling for Discord-like experience */
+.message-row {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Hover effects for interactive elements */
-.message-content:hover {
-  background-color: rgb(243 244 246) !important;
-  transform: translateY(-1px);
+/* Hover effects for message rows */
+.message-row:hover {
+  background-color: rgba(55, 65, 81, 0.5) !important;
   transition: all 0.2s ease;
 }
 
 /* Selection mode styling */
 .message-selected {
-  background-color: rgb(219 234 254) !important;
-  border: 2px solid rgb(59 130 246);
+  background-color: rgba(37, 99, 235, 0.3) !important;
+  border-left: 4px solid rgb(59, 130, 246);
 }
 
-/* Animation for auto-play */
-.message-transition {
-  opacity: 0;
-  transform: translateX(20px);
-  animation: slideIn 0.3s ease-out forwards;
+/* Snake-like icon arrangement animation */
+.icon-snake {
+  display: inline-flex;
+  gap: 4px;
+  animation: slideRight 0.3s ease-out;
 }
 
-@keyframes slideIn {
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-/* Custom scrollbar */
+/* Real-time message appearance animation */
+.message-appear {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: messageSlideIn 0.4s ease-out forwards;
+}
+
+@keyframes messageSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar for Discord-like experience */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #2d3748;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #4a5568;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #718096;
 }
 
 /* Gesture interaction feedback */
-.message-content:active {
-  transform: scale(0.98);
+.message-row:active {
+  transform: scale(0.99);
   transition: transform 0.1s ease;
 }
 
-/* Language selector styling */
+/* Avatar hover effects */
+img[alt="Avatar"]:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Language selector Discord-style */
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 16px;
@@ -78,14 +102,8 @@ select {
 
 /* Modal backdrop blur */
 .modal-backdrop {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Avatar image optimization */
-img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Button hover animations */
@@ -95,46 +113,46 @@ button {
 
 button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-/* Floating action button pulse */
+/* Floating action button with Discord-style pulse */
 .fab-pulse {
-  animation: pulse 2s infinite;
+  animation: discordPulse 2s infinite;
 }
 
-@keyframes pulse {
+@keyframes discordPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 15px rgba(88, 101, 242, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 0 rgba(88, 101, 242, 0);
   }
 }
 
-/* Touch-friendly tap targets */
+/* Touch-friendly interactions for mobile */
 @media (hover: none) and (pointer: coarse) {
   button {
     min-height: 44px;
     min-width: 44px;
   }
   
-  .message-content {
+  .message-row {
     padding: 16px !important;
   }
 }
 
-/* Loading spinner */
+/* Loading spinner for real-time updates */
 .spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border: 3px solid #4a5568;
+  border-top: 3px solid #5865f2;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -146,27 +164,123 @@ button:active:not(:disabled) {
   100% { transform: rotate(360deg); }
 }
 
-/* Message type indicators */
+/* Message type indicators with Discord colors */
 .message-type-voice {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 
 .message-type-text {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #5865f2 0%, #7c3aed 100%);
 }
 
 .message-type-image {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #00d4aa 0%, #1abc9c 100%);
 }
 
-/* Responsive design */
-@media (max-width: 640px) {
-  .message-content {
+.message-type-location {
+  background: linear-gradient(135deg, #f04747 0%, #e74c3c 100%);
+}
+
+.message-type-video {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.message-type-red_packet {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+}
+
+/* Discord-style hover states */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:visible {
+  visibility: visible;
+}
+
+/* Icon button hover effects */
+.icon-button {
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: rgba(79, 84, 92, 0.32);
+  transform: scale(1.1);
+}
+
+/* Real-time connection indicator */
+.connection-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.connection-status.connected {
+  background-color: #43b581;
+  box-shadow: 0 0 6px #43b581;
+}
+
+.connection-status.disconnected {
+  background-color: #f04747;
+  box-shadow: 0 0 6px #f04747;
+}
+
+/* Responsive design for different screen sizes */
+@media (max-width: 768px) {
+  .message-row {
     padding: 12px;
   }
   
   .modal-content {
     margin: 16px;
     width: calc(100% - 32px);
+  }
+  
+  .fab-mobile {
+    bottom: 80px;
+  }
+}
+
+/* Animation for new messages arriving */
+.new-message {
+  animation: newMessageGlow 1s ease-out;
+}
+
+@keyframes newMessageGlow {
+  0% {
+    background-color: rgba(88, 101, 242, 0.3);
+    box-shadow: 0 0 20px rgba(88, 101, 242, 0.5);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* Drag and drop visual feedback */
+.dragging {
+  opacity: 0.6;
+  transform: rotate(2deg);
+}
+
+.drag-over {
+  border: 2px dashed #5865f2;
+  background-color: rgba(88, 101, 242, 0.1);
+}
+
+/* Global chat indicator */
+.global-indicator {
+  animation: globalPulse 3s infinite;
+}
+
+@keyframes globalPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }

@@ -30,7 +30,7 @@ const MessagingApp = () => {
     loadLanguages();
   }, []);
 
-  // Auto-refresh messages for real-time experience
+  // Auto-refresh messages for real-time global messaging
   useEffect(() => {
     if (autoRefresh && isRegistered) {
       loadMessages(); // Initial load
@@ -50,7 +50,7 @@ const MessagingApp = () => {
     };
   }, [autoRefresh, isRegistered]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (Discord-style)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -138,7 +138,7 @@ const MessagingApp = () => {
     if (isSelectionMode) {
       toggleMessageSelection(message.id);
     } else {
-      // Show message details - for now just log
+      // Show message details - for Discord-style, just highlight
       console.log('Viewing message:', message);
     }
   };
@@ -154,7 +154,6 @@ const MessagingApp = () => {
   const handleLongPress = (message, event) => {
     event.preventDefault();
     if (!isSelectionMode) {
-      // Start selection mode or delete single message
       setIsSelectionMode(true);
       setSelectedMessages([message.id]);
     }
@@ -163,7 +162,7 @@ const MessagingApp = () => {
   const handleMouseDown = (message, event) => {
     const timeout = setTimeout(() => {
       handleLongPress(message, event);
-    }, 500); // 500ms for long press
+    }, 500);
     setLongPressTimeout(timeout);
   };
 
@@ -211,12 +210,11 @@ const MessagingApp = () => {
   };
 
   const deleteSelectedMessages = () => {
-    // In a real app, this would call the delete API
     console.log('Deleting messages:', selectedMessages);
     exitSelectionMode();
   };
 
-  // Get message type icons dynamically
+  // Get message type icons dynamically (Snake-like icon arrangement)
   const getMessageTypeIcons = (message) => {
     const icons = [];
     
@@ -243,7 +241,7 @@ const MessagingApp = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md border border-white/20">
-          <h1 className="text-3xl font-bold text-white text-center mb-8">智能消息 AI Chat</h1>
+          <h1 className="text-3xl font-bold text-white text-center mb-8">🌍 全球智能消息 Global AI Chat</h1>
           <form onSubmit={handleRegistration} className="space-y-6">
             <div>
               <label className="block text-white/90 text-sm font-medium mb-2">
@@ -284,9 +282,9 @@ const MessagingApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b p-4">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      {/* Discord-style Header */}
+      <div className="bg-gray-800 shadow-lg border-b border-gray-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {currentUser && (
@@ -296,17 +294,20 @@ const MessagingApp = () => {
                   alt="Avatar"
                   className="w-10 h-10 rounded-full border-2 border-blue-400"
                 />
-                <span className="font-semibold text-gray-800">{currentUser.nickname}</span>
+                <div>
+                  <span className="font-semibold text-white">{currentUser.nickname}</span>
+                  <span className="block text-xs text-gray-400">🌍 Global Chat</span>
+                </div>
               </div>
             )}
           </div>
           
-          {/* Language Selector */}
+          {/* Language Selector and Controls */}
           <div className="flex items-center space-x-4">
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="px-3 py-1 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               {languages.map(lang => (
                 <option key={lang.code} value={lang.code}>{lang.name}</option>
@@ -314,140 +315,152 @@ const MessagingApp = () => {
             </select>
             
             <button
-              onClick={() => setAutoPlay(!autoPlay)}
+              onClick={() => setAutoRefresh(!autoRefresh)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                autoPlay 
-                  ? 'bg-red-500 text-white hover:bg-red-600' 
-                  : 'bg-green-500 text-white hover:bg-green-600'
+                autoRefresh 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-gray-600 text-white hover:bg-gray-700'
               }`}
             >
-              {autoPlay ? '停止自动播放' : '开始自动播放'}
+              {autoRefresh ? '🔄 实时 Live' : '⏸️ 暂停 Pause'}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Message Display Area */}
-      <div className="flex-1 p-4">
-        {messages.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">暂无消息 No messages yet</p>
-            <button
-              onClick={() => setShowNewMessageModal(true)}
-              className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              发送第一条消息 Send First Message
-            </button>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto">
-            {/* Single Message Display */}
-            {currentMessage && (
-              <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
-                {/* Position 1: Avatar and User Info */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <button
-                    onClick={() => setShowUserDetails(true)}
-                    className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors"
-                  >
-                    {currentSender && (
-                      <>
-                        <img
-                          src={`data:image/png;base64,${currentSender.avatar_base64}`}
-                          alt="Avatar"
-                          className="w-12 h-12 rounded-full border-2 border-gray-200"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-800">{currentSender.nickname}</p>
-                          <p className="text-xs text-gray-500">{currentSender.id}</p>
-                        </div>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Position 2: Message Content */}
-                <div
-                  className="bg-gray-50 rounded-xl p-4 mb-4 cursor-pointer select-none message-content"
-                  onClick={(e) => handleSingleClick(currentMessage, e)}
-                  onDoubleClick={(e) => handleDoubleClick(currentMessage, e)}
-                  onMouseDown={(e) => handleMouseDown(currentMessage, e)}
-                  onMouseUp={handleMouseUp}
-                  onDragStart={(e) => handleDragSelect(currentMessage)}
-                >
-                  <p className="text-gray-800">{currentMessage.content}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-gray-500">
-                      {new Date(currentMessage.timestamp).toLocaleString()}
-                    </span>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      {currentMessage.message_type}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Position 3: Message Icons/Attachments */}
-                <div className="flex items-center justify-between">
-                  <div className="flex space-x-3">
-                    <button className="text-gray-400 hover:text-blue-500 transition-colors p-2 rounded-lg hover:bg-gray-100">
-                      🎤
-                    </button>
-                    <button className="text-gray-400 hover:text-green-500 transition-colors p-2 rounded-lg hover:bg-gray-100">
-                      📷
-                    </button>
-                    <button className="text-gray-400 hover:text-purple-500 transition-colors p-2 rounded-lg hover:bg-gray-100">
-                      📍
-                    </button>
-                    <button className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-gray-100">
-                      🎁
-                    </button>
-                  </div>
-                  
-                  <div className="text-sm text-gray-500">
-                    {currentMessageIndex + 1} / {messages.length}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Controls */}
-            <div className="flex justify-center space-x-4 mb-6">
+      {/* Discord-style Message Stream */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto px-4 py-2" style={{maxHeight: 'calc(100vh - 140px)'}}>
+          {messages.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">🌍 等待全球消息... Waiting for global messages...</p>
               <button
-                onClick={() => setCurrentMessageIndex(Math.max(0, currentMessageIndex - 1))}
-                disabled={currentMessageIndex === 0}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
+                onClick={() => setShowNewMessageModal(true)}
+                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                上一条 Previous
-              </button>
-              <button
-                onClick={() => setCurrentMessageIndex(Math.min(messages.length - 1, currentMessageIndex + 1))}
-                disabled={currentMessageIndex === messages.length - 1}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
-              >
-                下一条 Next
+                发送第一条消息 Send First Message
               </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-1">
+              {messages.map((message, index) => {
+                const sender = getUserById(message.sender_id);
+                const icons = getMessageTypeIcons(message);
+                const isSelected = selectedMessages.includes(message.id);
+                
+                return (
+                  <div
+                    key={message.id}
+                    className={`message-row group hover:bg-gray-800/50 rounded-lg p-3 transition-all duration-200 cursor-pointer select-none ${
+                      isSelected ? 'bg-blue-900/30 border-l-4 border-blue-400' : ''
+                    }`}
+                    onClick={(e) => handleSingleClick(message, e)}
+                    onDoubleClick={(e) => handleDoubleClick(message, e)}
+                    onMouseDown={(e) => handleMouseDown(message, e)}
+                    onMouseUp={handleMouseUp}
+                    draggable={isSelectionMode}
+                    onDragStart={(e) => handleDragStart(message, e)}
+                    onDragOver={(e) => handleDragOver(message, e)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <div className="flex items-start space-x-3">
+                      {/* Position 1: Avatar */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUser(sender);
+                          setShowUserDetails(true);
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        {sender && (
+                          <img
+                            src={`data:image/png;base64,${sender.avatar_base64}`}
+                            alt="Avatar"
+                            className="w-10 h-10 rounded-full hover:ring-2 hover:ring-blue-400 transition-all"
+                          />
+                        )}
+                      </button>
+
+                      {/* Message Content Area */}
+                      <div className="flex-1 min-w-0">
+                        {/* Username and timestamp */}
+                        <div className="flex items-baseline space-x-2 mb-1">
+                          <span className="font-semibold text-white hover:underline cursor-pointer">
+                            {sender?.nickname || 'Unknown'}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </span>
+                          {/* Position 3: Dynamic Icons (Snake-like arrangement) */}
+                          <div className="flex space-x-1 ml-auto">
+                            {icons.map((iconData, idx) => (
+                              <button
+                                key={`${iconData.type}-${idx}`}
+                                className={`text-lg hover:scale-110 transition-transform ${iconData.color}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log(`Clicked ${iconData.type} for message:`, message);
+                                }}
+                                title={iconData.type}
+                              >
+                                {iconData.icon}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Position 2: Message Content */}
+                        <div className="text-gray-200 break-words">
+                          {message.content}
+                          
+                          {/* Additional content based on message type */}
+                          {message.location_data && (
+                            <div className="mt-2 p-2 bg-gray-700 rounded text-sm">
+                              📍 {message.location_data.address}
+                            </div>
+                          )}
+                          
+                          {message.voice_base64 && (
+                            <div className="mt-2 flex items-center space-x-2 text-purple-400">
+                              <span>🎤 Voice message</span>
+                            </div>
+                          )}
+                          
+                          {message.image_base64 && (
+                            <div className="mt-2 flex items-center space-x-2 text-green-400">
+                              <span>📷 Image attached</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Selection Mode Controls */}
       {isSelectionMode && (
-        <div className="fixed bottom-4 left-4 right-4 bg-white rounded-xl shadow-lg p-4 border">
+        <div className="bg-gray-800 border-t border-gray-700 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-300">
               已选择 {selectedMessages.length} 条消息
             </span>
             <div className="flex space-x-3">
               <button
                 onClick={exitSelectionMode}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 取消 Cancel
               </button>
               <button
                 onClick={deleteSelectedMessages}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 删除 Delete
               </button>
@@ -459,32 +472,32 @@ const MessagingApp = () => {
       {/* Floating Action Button */}
       <button
         onClick={() => setShowNewMessageModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-200 transform hover:scale-110 flex items-center justify-center text-2xl"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-110 flex items-center justify-center text-2xl z-50"
       >
         ✏️
       </button>
 
       {/* New Message Modal */}
       {showNewMessageModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-semibold mb-4">发送新消息 New Message</h3>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700">
+            <h3 className="text-xl font-semibold mb-4 text-white">🌍 发送全球消息 Send Global Message</h3>
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="w-full h-32 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-gray-400"
               placeholder="输入消息内容... Type your message..."
             />
             <div className="flex justify-end space-x-3 mt-4">
               <button
                 onClick={() => setShowNewMessageModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 取消 Cancel
               </button>
               <button
                 onClick={sendMessage}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 发送 Send
               </button>
@@ -494,22 +507,25 @@ const MessagingApp = () => {
       )}
 
       {/* User Details Modal */}
-      {showUserDetails && currentSender && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+      {showUserDetails && selectedUser && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm border border-gray-700">
             <div className="text-center">
               <img
-                src={`data:image/png;base64,${currentSender.avatar_base64}`}
+                src={`data:image/png;base64,${selectedUser.avatar_base64}`}
                 alt="Avatar"
                 className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-400"
               />
-              <h3 className="text-xl font-semibold mb-2">{currentSender.nickname}</h3>
-              <p className="text-gray-600 text-sm mb-2">ID: {currentSender.id}</p>
-              <p className="text-gray-600 text-sm">Phone: {currentSender.phone_number}</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">{selectedUser.nickname}</h3>
+              <p className="text-gray-400 text-sm mb-2">ID: {selectedUser.id}</p>
+              <p className="text-gray-400 text-sm">Phone: {selectedUser.phone_number}</p>
             </div>
             <button
-              onClick={() => setShowUserDetails(false)}
-              className="w-full mt-6 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={() => {
+                setShowUserDetails(false);
+                setSelectedUser(null);
+              }}
+              className="w-full mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               关闭 Close
             </button>
