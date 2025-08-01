@@ -30,24 +30,34 @@ const MessagingApp = () => {
     loadLanguages();
   }, []);
 
-  // Auto-play functionality
+  // Auto-refresh messages for real-time experience
   useEffect(() => {
-    if (autoPlay && messages.length > 0) {
-      autoPlayInterval.current = setInterval(() => {
-        setCurrentMessageIndex(prev => (prev + 1) % messages.length);
-      }, 3000); // 3 seconds per message
+    if (autoRefresh && isRegistered) {
+      loadMessages(); // Initial load
+      autoRefreshInterval.current = setInterval(() => {
+        loadMessages();
+      }, 2000); // Refresh every 2 seconds for real-time feel
     } else {
-      if (autoPlayInterval.current) {
-        clearInterval(autoPlayInterval.current);
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
       }
     }
 
     return () => {
-      if (autoPlayInterval.current) {
-        clearInterval(autoPlayInterval.current);
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
       }
     };
-  }, [autoPlay, messages.length]);
+  }, [autoRefresh, isRegistered]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const loadLanguages = async () => {
     try {
